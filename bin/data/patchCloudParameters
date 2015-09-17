@@ -1,0 +1,18 @@
+<group>
+	<PatchCloudParameters>
+		<mapFromLowZ>0</mapFromLowZ>
+		<mapFromHighZ>255</mapFromHighZ>
+		<mapToLowZ>0</mapToLowZ>
+		<mapToHighZ>0</mapToHighZ>
+		<transformConstant>1</transformConstant>
+		<Kinect_Distance>0</Kinect_Distance>
+	<stepSize>4</stepSize>
+		<pointSize>4</pointSize>
+	<Mouse_Input>1</Mouse_Input>
+	<info>0</info>
+	<Kinect_Distance_Y>0</Kinect_Distance_Y>
+	<Kinect_Far_Clipping>0</Kinect_Far_Clipping>
+	<Point_Cloud_Far_Clipping>0</Point_Cloud_Far_Clipping>
+	</PatchCloudParameters>
+<group/>
+</group>
