@@ -34,12 +34,14 @@ public:
     int height;
     bool isConnected();
     bool isPointCloudDrawn();
+    bool getHasNewFrame(); 
     
     ofxCvGrayscaleImage getPatchedCvImage();
     
 private:
     ofxKinect kinect[amt];
-    int unsigned angle;
+    int angle;
+    bool hasNewFrame;
     ofxCvGrayscaleImage grayImage[amt]; // grayscale depth image
     ofxCvGrayscaleImage patchedImageCv;
     

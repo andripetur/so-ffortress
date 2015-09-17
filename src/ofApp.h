@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxOpenCv.h"
+#include "ofxCv.h"
 #include "ofxOsc.h"
 #include "string.h"
 #include "ofxGui.h"
@@ -23,16 +24,19 @@ public:
     ofColor avgColor(ofRectangle area, float offsetRatio);
     string colorNamer(ofColor toBeNamed);
     void setupGui();
+    void drawContFinder();
     
     pointCloudStitcher kinect;
     
     // GUI Variables
     ofxPanel gui;
     ofParameter<bool> bShowInfo;
+    bool bShowLabels; 
     
     ofxCvGrayscaleImage patchedImageCv, grayImage;
 	
 	ofxCvContourFinder contourFinder;
+    ofxCv::ContourFinder contFinder; 
     
     //CompVisionShizNit
     ofxCvGrayscaleImage     grayDiffOfImage;

@@ -12,6 +12,17 @@ void ofApp::setup() {
     bBackgroundLearned = false;
     bForgetBackground = false;
     
+    bShowLabels = true;
+    
+    contFinder.setMinAreaRadius(100);
+    contFinder.setMaxAreaRadius(200);
+    contFinder.setThreshold(5);
+
+    // wait for half a frame before forgetting something
+    contFinder.getTracker().setPersistence(15); // 15
+    // an object can move up to 32 pixels per frame
+    contFinder.getTracker().setMaximumDistance(32);
+    
 	ofSetFrameRate(60);
         
     // open an outgoing OSC connection to HOST:PORT
@@ -33,36 +44,44 @@ void ofApp::setupGui(){
 void ofApp::update() {
     kinect.update();
     
-    // set new background image
-    if(bLearnBackground){
-        bgImage = kinect.getPatchedCvImage();   // let this frame be the background image from now on
-        bLearnBackground = false;
-        bBackgroundLearned = true;
-    }
-    
-    if(bForgetBackground){
-        bBackgroundLearned = false;
-        bForgetBackground = false;
-    }
-    
-    if(bBackgroundLearned){
-        grayImage = kinect.getPatchedCvImage();
-        cvAbsDiff(bgImage.getCvImage(), grayImage.getCvImage(), grayDiff.getCvImage());
-        cvErode(grayDiff.getCvImage(), grayDiff.getCvImage(), NULL, 3);
-        cvDilate(grayDiff.getCvImage(), grayDiff.getCvImage(), NULL, 1);
-        // threshold ignoring little differences
-        cvThreshold(grayDiff.getCvImage(), grayDiff.getCvImage(), 20, 255, CV_THRESH_BINARY);
-        grayDiff.flagImageChanged();
-        // update the ofImage to be used as background mask for the blob finder
-        grayDiffOfImage.setFromPixels(grayDiff.getPixels(), kinect.width, kinect.height);
+    if(kinect.getHasNewFrame()){
+        // set new background image
+        if(bLearnBackground){
+            bgImage = kinect.getPatchedCvImage();   // let this frame be the background image from now on
+            bLearnBackground = false;
+            bBackgroundLearned = true;
+        }
         
-        // update the cv images
-        grayDiffOfImage.flagImageChanged();
+        if(bForgetBackground){
+            bBackgroundLearned = false;
+            bForgetBackground = false;
+        }
+        
+        grayImage = kinect.getPatchedCvImage();
+        grayImage.flagImageChanged();
+        if(bBackgroundLearned){
+            cvAbsDiff(bgImage.getCvImage(), grayImage.getCvImage(), grayDiff.getCvImage());
+            cvErode(grayDiff.getCvImage(), grayDiff.getCvImage(), NULL, 2);
+            cvDilate(grayDiff.getCvImage(), grayDiff.getCvImage(), NULL, 1);
+            // threshold ignoring little differences
+            cvThreshold(grayDiff.getCvImage(), grayDiff.getCvImage(), 4, 255, CV_THRESH_BINARY);
+            grayDiff.flagImageChanged();
+            // update the ofImage to be used as background mask for the blob finder
+            grayDiffOfImage.setFromPixels(grayDiff.getPixels(), kinect.width, kinect.height);
+            
+            // update the cv images
+            grayDiffOfImage.flagImageChanged();
 
-        // find contours which are between the size of 100 pixels and 1/3 the w*h pixels.
-        contourFinder.findContours(grayDiffOfImage, 100, (kinect.width*kinect.height)/2, 20, false);
-    }//isFrameNew
-
+            // find contours which are between the size of 100 pixels and 1/3 the w*h pixels.
+            contourFinder.findContours(grayDiffOfImage, 100, (kinect.width*kinect.height)/2, 20, false);
+            contFinder.findContours(grayDiffOfImage.getCvImage());
+        } else {
+            contourFinder.findContours(grayImage, 100, (kinect.width*kinect.height)/2, 20, false);
+            grayImage.flagImageChanged();
+            contFinder.findContours(grayImage.getCvImage());
+        }//backGroundLearned
+    }
+    
     /*
     // send a osc message for every blob
     // format /blobs <id> <area> <x> <y> <z>
@@ -179,6 +198,76 @@ string ofApp::colorNamer(ofColor tBn){
     return colorName;
 }
 
+void ofApp::drawContFinder(){
+    ofSetBackgroundAuto(bShowLabels);
+    ofxCv::RectTracker& tracker = contFinder.getTracker();
+    
+    if(bShowLabels) {
+        ofSetColor(255);
+        if(bBackgroundLearned){
+            grayDiffOfImage.draw(0,0);
+        } else {
+            grayImage.draw(0, 0);
+        }
+        contFinder.draw();
+        for(int i = 0; i < contFinder.size(); i++) {
+            ofPoint center = ofxCv::toOf(contFinder.getCenter(i));
+            ofPushMatrix();
+            ofTranslate(center.x, center.y);
+            int label = contFinder.getLabel(i);
+            string msg = ofToString(label) + ":" + ofToString(tracker.getAge(label));
+            ofDrawBitmapString(msg, 0, 0);
+            ofVec2f velocity = ofxCv::toOf(contFinder.getVelocity(i));
+            ofScale(5, 5);
+            ofLine(0, 0, velocity.x, velocity.y);
+            ofPopMatrix();
+        }
+    } else {
+        for(int i = 0; i < contFinder.size(); i++) {
+            unsigned int label = contFinder.getLabel(i);
+            // only draw a line if this is not a new label
+            if(tracker.existsPrevious(label)) {
+                // use the label to pick a random color
+                ofSeedRandom(label << 24);
+                ofSetColor(ofColor::fromHsb(ofRandom(255), 255, 255));
+                // get the tracked object (cv::Rect) at current and previous position
+                const cv::Rect& previous = tracker.getPrevious(label);
+                const cv::Rect& current = tracker.getCurrent(label);
+                // get the centers of the rectangles
+                ofVec2f previousPosition(previous.x + previous.width / 2, previous.y + previous.height / 2);
+                ofVec2f currentPosition(current.x + current.width / 2, current.y + current.height / 2);
+                ofLine(previousPosition, currentPosition);
+            }
+        }
+    }
+    
+    // this chunk of code visualizes the creation and destruction of labels
+    const vector<unsigned int>& currentLabels = tracker.getCurrentLabels();
+    const vector<unsigned int>& previousLabels = tracker.getPreviousLabels();
+    const vector<unsigned int>& newLabels = tracker.getNewLabels();
+    const vector<unsigned int>& deadLabels = tracker.getDeadLabels();
+    ofSetColor(ofxCv::cyanPrint);
+    for(int i = 0; i < currentLabels.size(); i++) {
+        int j = currentLabels[i];
+        ofLine(j, 0, j, 4);
+    }
+    ofSetColor(ofxCv::magentaPrint);
+    for(int i = 0; i < previousLabels.size(); i++) {
+        int j = previousLabels[i];
+        ofLine(j, 4, j, 8);
+    }
+    ofSetColor(ofxCv::yellowPrint);
+    for(int i = 0; i < newLabels.size(); i++) {
+        int j = newLabels[i];
+        ofLine(j, 8, j, 12);
+    }
+    ofSetColor(ofColor::white);
+    for(int i = 0; i < deadLabels.size(); i++) {
+        int j = deadLabels[i];
+        ofLine(j, 12, j, 16);
+    }
+}
+
 //--------------------------------------------------------------
 void ofApp::draw() {
     
@@ -188,15 +277,19 @@ void ofApp::draw() {
     kinect.draw();
 	if(!kinect.isPointCloudDrawn()) {
         
-        grayDiffOfImage.draw(10, 320, 200, 150);
-		contourFinder.draw(10, 320, 200, 150);
-        
         if(bBackgroundLearned){
             grayDiffOfImage.draw(420, 10, 400, 300);
-            contourFinder.draw(420, 10, 400, 300);
-        } else {
-            kinect.getPatchedCvImage().draw(420, 10, 400, 300);
         }
+        else{
+            grayImage.draw(420, 10, 400, 300);
+        }
+        
+        contourFinder.draw(420, 10, 400, 300);
+        
+        ofPushMatrix();
+            ofTranslate(420, 320);
+            drawContFinder();
+        ofPopMatrix();
         /*
         // Find color of blob and draw it
         if( contourFinder.blobs.size() > 0) {
@@ -259,6 +352,11 @@ void ofApp::keyPressed (int key) {
         case'i':
         case'I':
             bShowInfo = !bShowInfo;
+            break;
+            
+        case'l':
+        case'L':
+            bShowLabels = !bShowLabels;
             break;
 	}
 }

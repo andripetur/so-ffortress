@@ -10,8 +10,8 @@
 
 void pointCloudStitcher::setup(){
     // zero the tilt on startup
-    angle = 10;
-    
+    angle = -30;
+    hasNewFrame = false; 
     for(int i=0; i<amt; ++i){
         kinect[i].setRegistration(true);
         kinect[i].init(false, true);
@@ -63,7 +63,7 @@ void pointCloudStitcher::update(){
             grayImage[i].setFromPixels(kinect[i].getDepthPixels(), kinect[i].width, kinect[i].height);
             
         }
-        
+        hasNewFrame = true;
     }
     float ** adj;
     adj = adjustPointClouds(&kinect[0], &kinect[1]);
@@ -151,16 +151,15 @@ float** pointCloudStitcher::adjustPointClouds(ofxKinect* kinectOnePtr, ofxKinect
 }
 
 void pointCloudStitcher::mergeGrayImages(ofxCvGrayscaleImage imgOne, ofxCvGrayscaleImage imgTwo, float ** adj){
-    int brightnessOne;
     ofPoint tempPointCurrent;
     ofPixelsRef imgOnePix = imgOne.getPixelsRef();
     ofPixelsRef imgTwoPix = imgTwo.getPixelsRef();
     int offset;
-    int brightness;
+    int brightnessOne, brightness;
     for(int y = 0; y < imgTwo.getHeight(); ++y) {
         for(int x = 0; x < imgTwo.getWidth(); ++x) {
             brightnessOne = imgTwoPix.getColor(x, y).getBrightness();
-            if(brightnessOne> 0) {
+            if(brightnessOne>0) {
                 offset = int(x * adj[x][y]);
                 if(offset < imgOne.getWidth() && offset > 0) {
                     if( (brightness = imgOnePix.getColor(offset, y+kinectDistanceY).r) < brightnessOne ){
@@ -197,8 +196,7 @@ void pointCloudStitcher::exit(ofEventArgs & a){
 }
 
 void pointCloudStitcher::keyListener(ofKeyEventArgs & a){
-    int key = a.key;
-    switch (key) {
+    switch (a.key) {
         case ' ':
             bEnableMouseInput = !bEnableMouseInput;
             break;
@@ -240,6 +238,14 @@ bool pointCloudStitcher::isConnected(){
 }
 bool pointCloudStitcher::isPointCloudDrawn(){
     return bDrawPointCloud;
+}
+bool pointCloudStitcher::getHasNewFrame(){
+    if(hasNewFrame){
+        hasNewFrame=false;
+        return true;
+    } else {
+        return false; 
+    }
 }
 ofxCvGrayscaleImage pointCloudStitcher::getPatchedCvImage(){
     return patchedImageCv;
