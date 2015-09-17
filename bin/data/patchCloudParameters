@@ -13,6 +13,8 @@
 	<Kinect_Distance_Y>0</Kinect_Distance_Y>
 	<Kinect_Far_Clipping>0</Kinect_Far_Clipping>
 	<Point_Cloud_Far_Clipping>0</Point_Cloud_Far_Clipping>
+	<P.C._Far_Clip>0</P.C._Far_Clip>
 	</PatchCloudParameters>
 <group/>
+<info>0</info>
 </group>
