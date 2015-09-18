@@ -31,6 +31,7 @@ public:
     // GUI Variables
     ofxPanel gui;
     ofParameter<bool> bShowInfo;
+    ofParameter<int> minArea;
     bool bShowLabels; 
     
     ofxCvGrayscaleImage patchedImageCv, grayImage;

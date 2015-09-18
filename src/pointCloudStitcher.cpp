@@ -38,10 +38,11 @@ void pointCloudStitcher::setupParameters(){
     patchCloudParameters.add(transformConstant.set("transformConstant", 1, 0, 10));
     patchCloudParameters.add(kinectDistance.set("Kinect Distance", 0, 0, 1000));
     patchCloudParameters.add(kinectDistanceY.set("Kinect Distance Y", 0, -100, 100));
-    patchCloudParameters.add(pointCloudFarClipping.set("P.C. Far Clip", 0, 0, 10000));
-    patchCloudParameters.add(stepSize.set("stepSize", 4, 1, 10));
-    patchCloudParameters.add(pointSize.set("pointSize", 4, 1, 10));
-    patchCloudParameters.add(bEnableMouseInput.set("Mouse Input", true));
+    viewPointCloudParameters.setName("viewpPointCloudParams.");
+    viewPointCloudParameters.add(pointCloudFarClipping.set("P.C. Far Clip", 0, 0, 10000));
+    viewPointCloudParameters.add(stepSize.set("stepSize", 4, 1, 10));
+    viewPointCloudParameters.add(pointSize.set("pointSize", 4, 1, 10));
+    viewPointCloudParameters.add(bEnableMouseInput.set("Mouse Input", true));
 }
 
 void pointCloudStitcher::update(){

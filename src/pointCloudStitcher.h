@@ -28,7 +28,7 @@ public:
     void exit(ofEventArgs & a);
     void keyListener(ofKeyEventArgs & a);
     
-    ofParameterGroup patchCloudParameters;
+    ofParameterGroup patchCloudParameters, viewPointCloudParameters;
     
     int width;
     int height;

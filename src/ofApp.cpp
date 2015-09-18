@@ -14,12 +14,12 @@ void ofApp::setup() {
     
     bShowLabels = true;
     
-    contFinder.setMinAreaRadius(100);
-    contFinder.setMaxAreaRadius(200);
+    contFinder.setMinArea(100);
+    contFinder.setMaxArea((kinect.width*kinect.height)/2);
     contFinder.setThreshold(5);
 
     // wait for half a frame before forgetting something
-    contFinder.getTracker().setPersistence(15); // 15
+    contFinder.getTracker().setPersistence(30); // 15
     // an object can move up to 32 pixels per frame
     contFinder.getTracker().setMaximumDistance(32);
     
@@ -35,7 +35,9 @@ void ofApp::setup() {
 void ofApp::setupGui(){
     gui.setup();
     gui.add(kinect.patchCloudParameters);
+    gui.add(kinect.viewPointCloudParameters);
     gui.add(bShowInfo.set("info", false));
+    gui.add(minArea.set("cvMinArea", 100, 50, 300));
     gui.setPosition(820, 10);
     gui.saveToFile("patchCloudParameters");
 }
@@ -56,6 +58,7 @@ void ofApp::update() {
             bBackgroundLearned = false;
             bForgetBackground = false;
         }
+        contFinder.setMinArea(minArea);
         
         grayImage = kinect.getPatchedCvImage();
         grayImage.flagImageChanged();
@@ -77,7 +80,6 @@ void ofApp::update() {
             contFinder.findContours(grayDiffOfImage.getCvImage());
         } else {
             contourFinder.findContours(grayImage, 100, (kinect.width*kinect.height)/2, 20, false);
-            grayImage.flagImageChanged();
             contFinder.findContours(grayImage.getCvImage());
         }//backGroundLearned
     }
@@ -288,6 +290,7 @@ void ofApp::draw() {
         
         ofPushMatrix();
             ofTranslate(420, 320);
+            ofScale(0.625, 0.625);
             drawContFinder();
         ofPopMatrix();
         /*
@@ -322,7 +325,7 @@ void ofApp::draw() {
         reportStream
         << " b to learn background."<< endl
         << " f to forget background."<< endl
-        << " space to dis/enable mouse input"<< endl
+        << " space to dis/enable mouse input for pointcloud"<< endl
         << " num blobs found " << contourFinder.nBlobs
         << " fps: " << ofGetFrameRate() << endl
         << " c to close connection, o to open it again, connection is: " << kinect.isConnected() << endl;

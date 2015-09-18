@@ -17,4 +17,17 @@
 	</PatchCloudParameters>
 <group/>
 <info>0</info>
+<cvMinArea>100</cvMinArea>
+<adjustPointCloudParamters>
+		<P.C._Far_Clip>0</P.C._Far_Clip>
+		<stepSize>4</stepSize>
+		<pointSize>4</pointSize>
+		<Mouse_Input>1</Mouse_Input>
+	</adjustPointCloudParamters>
+<viewpPointCloudParams.>
+		<P.C._Far_Clip>0</P.C._Far_Clip>
+		<stepSize>4</stepSize>
+		<pointSize>4</pointSize>
+		<Mouse_Input>1</Mouse_Input>
+	</viewpPointCloudParams.>
 </group>
