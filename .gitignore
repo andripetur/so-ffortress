@@ -1,9 +1,7 @@
 *.app
-*.xcodeproj/
 *.xml
-*.xcconfig
-*.plist
 *.DS_Store
 *.png
 *.make
 *.gitkeep
+*.xcuserstate
