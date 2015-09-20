@@ -32,14 +32,12 @@ public:
     ofxPanel gui;
     ofParameter<bool> bShowInfo;
     ofParameter<int> minArea;
-    bool bShowLabels; 
-    
-    ofxCvGrayscaleImage patchedImageCv, grayImage;
-	
-	ofxCvContourFinder contourFinder;
-    ofxCv::ContourFinder contFinder; 
+    bool bShowLabels;
     
     //CompVisionShizNit
+    ofxCv::ContourFinder    contFinder;
+    ofxCvGrayscaleImage     patchedImageCv;
+    ofxCvGrayscaleImage     grayImage;
     ofxCvGrayscaleImage     grayDiffOfImage;
     ofxCvGrayscaleImage 	grayDiff;
     ofxCvGrayscaleImage     bgImage;
@@ -51,4 +49,6 @@ public:
     ofxOscSender sender;
 	
     ofColor testColor;
+    // blob label, color of blob
+    map<int, ofColor> blockColors;
 };

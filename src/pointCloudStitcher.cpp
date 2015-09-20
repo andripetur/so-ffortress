@@ -251,3 +251,6 @@ bool pointCloudStitcher::getHasNewFrame(){
 ofxCvGrayscaleImage pointCloudStitcher::getPatchedCvImage(){
     return patchedImageCv;
 }
+ofColor pointCloudStitcher::getColorAt(int x, int y){
+    return kinect[0].getColorAt(x, y);
+}

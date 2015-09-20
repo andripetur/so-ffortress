@@ -30,4 +30,5 @@
 		<pointSize>4</pointSize>
 		<Mouse_Input>1</Mouse_Input>
 	</viewpPointCloudParams.>
+<cvFarClip>255</cvFarClip>
 </group>

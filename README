@@ -1,6 +1,8 @@
 HKU Project 2015
 
 ffortress
-interactive sound blocks
+work in progress: interactive sound blocks
 
-work in progress 
+Dependencies: 
+of_0.8.4
+ofxCv

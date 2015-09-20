@@ -4,6 +4,7 @@
 void ofApp::setup() {
     kinect.setup();
     
+    // allocate space for compVis shiznit
     grayImage.allocate(kinect.width, kinect.height);
     grayDiff.allocate(kinect.width, kinect.height);
     grayDiffOfImage.allocate(kinect.width, kinect.height);
@@ -17,9 +18,10 @@ void ofApp::setup() {
     contFinder.setMinArea(100);
     contFinder.setMaxArea((kinect.width*kinect.height)/2);
     contFinder.setThreshold(5);
+//    contFinder.setFindHoles(false);
 
-    // wait for half a frame before forgetting something
-    contFinder.getTracker().setPersistence(30); // 15
+    // wait for a frame before forgetting something
+    contFinder.getTracker().setPersistence(30);
     // an object can move up to 32 pixels per frame
     contFinder.getTracker().setMaximumDistance(32);
     
@@ -27,7 +29,7 @@ void ofApp::setup() {
         
     // open an outgoing OSC connection to HOST:PORT
     sender.setup(HOST, PORT);
-        
+    
     setupGui();
 }
 
@@ -47,20 +49,23 @@ void ofApp::update() {
     kinect.update();
     
     if(kinect.getHasNewFrame()){
+        grayImage = kinect.getPatchedCvImage(); // get the merged cvImage from the two kinects
+        
         // set new background image
         if(bLearnBackground){
-            bgImage = kinect.getPatchedCvImage();   // let this frame be the background image from now on
+            bgImage = grayImage;   // let this frame be the background image from now on
             bLearnBackground = false;
             bBackgroundLearned = true;
         }
         
+        // forget background image
         if(bForgetBackground){
             bBackgroundLearned = false;
             bForgetBackground = false;
         }
+        // set minimal blob area
         contFinder.setMinArea(minArea);
         
-        grayImage = kinect.getPatchedCvImage();
         grayImage.flagImageChanged();
         if(bBackgroundLearned){
             cvAbsDiff(bgImage.getCvImage(), grayImage.getCvImage(), grayDiff.getCvImage());
@@ -75,49 +80,50 @@ void ofApp::update() {
             // update the cv images
             grayDiffOfImage.flagImageChanged();
 
-            // find contours which are between the size of 100 pixels and 1/3 the w*h pixels.
-            contourFinder.findContours(grayDiffOfImage, 100, (kinect.width*kinect.height)/2, 20, false);
+            // pass image on to contour finder
             contFinder.findContours(grayDiffOfImage.getCvImage());
         } else {
-            contourFinder.findContours(grayImage, 100, (kinect.width*kinect.height)/2, 20, false);
             contFinder.findContours(grayImage.getCvImage());
         }//backGroundLearned
     }
     
-    /*
+    
     // send a osc message for every blob
-    // format /blobs <id> <area> <x> <y> <z>
-    int nrOfBlobs = 1;
-    if( contourFinder.blobs.size() > 0) {
-        for(vector<ofxCvBlob>::iterator it = contourFinder.blobs.begin(); it != contourFinder.blobs.end(); ++it) {
-            ofxOscMessage m;
-            m.setAddress("/blobs");
-            m.addIntArg(nrOfBlobs);
-            m.addIntArg(it->area);
-            //location
-            m.addIntArg(it->centroid.x);
-            m.addIntArg(it->centroid.y);
-            m.addIntArg(it->centroid.z);
-            sender.sendMessage(m);
-            cout << "message sent to blob: " << nrOfBlobs << endl;
-            ++nrOfBlobs;
+    // format /blobs <index> <label> <age> <area> <x> <y>
+    ofPoint loc;
+    ofRectangle area;
+    int label;
+    if( contFinder.size() > 0) {
+        for(unsigned int i = 0; i<contFinder.size(); ++i) {
+            area = ofxCv::toOf(contFinder.getBoundingRect(i));
+            if(area.getCenter().y > kinect.height * 0.5){
+                ofxOscMessage m;
+                m.setAddress("/blobs");
+                m.addIntArg( i );                                       // index
+                m.addIntArg( (label = contFinder.getLabel(i)) );        // label
+                m.addIntArg( contFinder.getTracker().getAge(label) );   // age
+                m.addIntArg(( area.width*area.height ));                // area
+                loc = ofxCv::toOf(contFinder.getCenter(i));
+                m.addIntArg(loc.x);                                     // x
+                m.addIntArg(loc.y);                                     // y
+                sender.sendMessage(m);
+                cout << "message sent with label: " << contFinder.getLabel(i) << endl;
+            }
         } //for
     } else {
         ofxOscMessage m;
         m.setAddress("/blobs");
-        for(int i = 0; i<5;++i){
+        for(int i = 0; i<6;++i){
             m.addIntArg(0); // send to all poly instances, all info set to zero
         }
         sender.sendMessage(m);
         
     }// if
-     */
 }
-/*
 //--------------------------------------------------------------
 ofColor ofApp::avgColor(ofRectangle area, float offsetRatio){
     ofColor avgColor, currColor;
-    ofPixelsRef greyDiffPix = grayDiffOfImage[0].getPixelsRef();
+    ofPixelsRef greyDiffPix = grayDiffOfImage.getPixelsRef();
     unsigned int r, g, b;
     r = g = b = 0;
     int numberOfColoredPixels = 0;
@@ -129,7 +135,7 @@ ofColor ofApp::avgColor(ofRectangle area, float offsetRatio){
         for(int y=verticalOffset; y<area.height-verticalOffset; y+=stepSize){
             
             if(greyDiffPix.getColor(x, y) != ofColor(0,0,0)){ //only check color of nonblack areas in the blob
-//                currColor = kinect[0].getColorAt(area.x + x, area.y + y);
+                currColor = kinect.getColorAt(area.x + x, area.y + y);
                 r+= currColor.r;
                 g+= currColor.g;
                 b+= currColor.b;
@@ -141,10 +147,11 @@ ofColor ofApp::avgColor(ofRectangle area, float offsetRatio){
         avgColor = ofColor(r/(float)numberOfColoredPixels,
                            g/(float)numberOfColoredPixels,
                            b/(float)numberOfColoredPixels);
+    } else {
+        avgColor = ofColor(r, g, b);
     }
     return avgColor;
 }
- */
 
 //--------------------------------------------------------------
 string ofApp::colorNamer(ofColor tBn){
@@ -279,42 +286,29 @@ void ofApp::draw() {
     kinect.draw();
 	if(!kinect.isPointCloudDrawn()) {
         
-        if(bBackgroundLearned){
-            grayDiffOfImage.draw(420, 10, 400, 300);
-        }
-        else{
-            grayImage.draw(420, 10, 400, 300);
-        }
-        
-        contourFinder.draw(420, 10, 400, 300);
-        
         ofPushMatrix();
-            ofTranslate(420, 320);
+            ofTranslate(420, 10);
             ofScale(0.625, 0.625);
             drawContFinder();
         ofPopMatrix();
-        /*
+        
         // Find color of blob and draw it
-        if( contourFinder.blobs.size() > 0) {
-            for(vector<ofxCvBlob>::iterator it = contourFinder.blobs.begin(); it != contourFinder.blobs.end(); ++it){
-                ofSetColor( avgColor(it->boundingRect, 0.1f ) );
-                ofRect(420, 320, 400, 300);
+        ofRectangle boundingRect;
+        ofColor temp;
+        if( contFinder.size() > 0) {
+            for(int i=0; i<contFinder.size(); ++i){
+                boundingRect = ofxCv::toOf(contFinder.getBoundingRect(i));
+                if(boundingRect.getCenter().y > kinect.height * 0.5){
+                    ofSetColor( (temp = avgColor(boundingRect, 0 )) );
+                    ofRect(420, 320, 400, 300);
+//                    cout
+//                    << "r: " << (int)temp.r
+//                    << " b: " << (int)temp.b
+//                    << " g: " << (int)temp.g << endl;
+                }
 //                ofDrawBitmapString(colorNamer(temp), 420, 320); // draw name of color
             }
         }
-         */
-     
-    
-        /*
-        if( ofGetElapsedTimeMillis() - timer >= 2000 ){
-            timer = ofGetElapsedTimeMillis();
-            testColor = ofColor( ofRandom(255), ofRandom(255), ofRandom(255));
-        }
-        
-        ofSetColor(testColor);
-        ofRect(420, 320, 400, 300);
-        ofDrawBitmapString(colorNamer(testColor), 420, 320); // draw name of color
-         */
 	}
 
 	// draw instructions
@@ -326,7 +320,7 @@ void ofApp::draw() {
         << " b to learn background."<< endl
         << " f to forget background."<< endl
         << " space to dis/enable mouse input for pointcloud"<< endl
-        << " num blobs found " << contourFinder.nBlobs
+        << " num blobs found " << contFinder.size()
         << " fps: " << ofGetFrameRate() << endl
         << " c to close connection, o to open it again, connection is: " << kinect.isConnected() << endl;
     

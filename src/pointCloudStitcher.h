@@ -34,7 +34,8 @@ public:
     int height;
     bool isConnected();
     bool isPointCloudDrawn();
-    bool getHasNewFrame(); 
+    bool getHasNewFrame();
+    ofColor getColorAt(int x, int y); 
     
     ofxCvGrayscaleImage getPatchedCvImage();
     
