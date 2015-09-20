@@ -24,6 +24,7 @@ public:
     ofColor avgColor(ofRectangle area, float offsetRatio);
     string colorNamer(ofColor toBeNamed);
     void setupGui();
+    void oscSender();
     void drawContFinder();
     
     pointCloudStitcher kinect;

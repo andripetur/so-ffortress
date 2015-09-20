@@ -87,39 +87,57 @@ void ofApp::update() {
         }//backGroundLearned
     }
     
+    oscSender();
+}
+
+//--------------------------------------------------------------
+void ofApp::oscSender(){
+#define SHOW_SENDER_DEBUG
+    ofxCv::RectTracker& tracker = contFinder.getTracker();
+    const vector<unsigned int>& newLabels = tracker.getNewLabels();
+    const vector<unsigned int>& deadLabels = tracker.getDeadLabels();
     
-    // send a osc message for every blob
-    // format /blobs <index> <label> <age> <area> <x> <y>
     ofPoint loc;
     ofRectangle area;
     int label;
-    if( contFinder.size() > 0) {
-        for(unsigned int i = 0; i<contFinder.size(); ++i) {
-            area = ofxCv::toOf(contFinder.getBoundingRect(i));
-            if(area.getCenter().y > kinect.height * 0.5){
-                ofxOscMessage m;
-                m.setAddress("/blobs");
-                m.addIntArg( i );                                       // index
-                m.addIntArg( (label = contFinder.getLabel(i)) );        // label
-                m.addIntArg( contFinder.getTracker().getAge(label) );   // age
-                m.addIntArg(( area.width*area.height ));                // area
-                loc = ofxCv::toOf(contFinder.getCenter(i));
-                m.addIntArg(loc.x);                                     // x
-                m.addIntArg(loc.y);                                     // y
-                sender.sendMessage(m);
-                cout << "message sent with label: " << contFinder.getLabel(i) << endl;
-            }
-        } //for
-    } else {
+    
+    // new block = /newBlob <label> <color>
+    for(int i=0; i< newLabels.size(); ++i){
         ofxOscMessage m;
-        m.setAddress("/blobs");
-        for(int i = 0; i<6;++i){
-            m.addIntArg(0); // send to all poly instances, all info set to zero
-        }
+        m.setAddress("/newBlob");
+        m.addIntArg(newLabels[i]);      // label
+        m.addStringArg("/color");       // color
         sender.sendMessage(m);
-        
-    }// if
+    }
+    
+    // block update = /currentBlob <label> <area> <age> <x> <y>
+    for(int i=0; i<contFinder.size(); ++i){
+        ofxOscMessage m;
+        m.setAddress("/currentBlob");
+        m.addIntArg((label = contFinder.getLabel(i)) );        // label
+        area = ofxCv::toOf( contFinder.getBoundingRect(i));
+        m.addIntArg((area.width*area.height ));                // area
+        m.addIntArg(tracker.getAge(label) );                   // age
+        loc = ofxCv::toOf(contFinder.getCenter(i));
+        m.addIntArg(loc.x);                                    // x
+        m.addIntArg(loc.y);                                    // y
+        sender.sendMessage(m);
+    }
+    
+    // block dead = /deadBlob <label>
+    for (int i=0; i<deadLabels.size(); ++i) {
+        ofxOscMessage m;
+        m.setAddress("/deadBlob");
+        m.addIntArg((label = deadLabels[i] ));        // label
+        sender.sendMessage(m);
+    }
+#ifdef SHOW_SENDER_DEBUG
+    cout << "new labels:     " << newLabels.size() << endl;
+    cout << "current labels: " << contFinder.size() << endl;
+    cout << "dead labels:    " << deadLabels.size() << endl<<endl;
+#endif
 }
+
 //--------------------------------------------------------------
 ofColor ofApp::avgColor(ofRectangle area, float offsetRatio){
     ofColor avgColor, currColor;
@@ -219,7 +237,7 @@ void ofApp::drawContFinder(){
             grayImage.draw(0, 0);
         }
         contFinder.draw();
-        for(int i = 0; i < contFinder.size(); i++) {
+        for(int i = 0; i < contFinder.size(); ++i) {
             ofPoint center = ofxCv::toOf(contFinder.getCenter(i));
             ofPushMatrix();
             ofTranslate(center.x, center.y);
@@ -232,7 +250,7 @@ void ofApp::drawContFinder(){
             ofPopMatrix();
         }
     } else {
-        for(int i = 0; i < contFinder.size(); i++) {
+        for(int i = 0; i < contFinder.size(); ++i) {
             unsigned int label = contFinder.getLabel(i);
             // only draw a line if this is not a new label
             if(tracker.existsPrevious(label)) {
@@ -256,23 +274,24 @@ void ofApp::drawContFinder(){
     const vector<unsigned int>& newLabels = tracker.getNewLabels();
     const vector<unsigned int>& deadLabels = tracker.getDeadLabels();
     ofSetColor(ofxCv::cyanPrint);
-    for(int i = 0; i < currentLabels.size(); i++) {
-        int j = currentLabels[i];
+    int j;
+    for(int i = 0; i < currentLabels.size(); ++i) {
+        j = currentLabels[i];
         ofLine(j, 0, j, 4);
     }
     ofSetColor(ofxCv::magentaPrint);
-    for(int i = 0; i < previousLabels.size(); i++) {
-        int j = previousLabels[i];
+    for(int i = 0; i < previousLabels.size(); ++i) {
+        j = previousLabels[i];
         ofLine(j, 4, j, 8);
     }
     ofSetColor(ofxCv::yellowPrint);
-    for(int i = 0; i < newLabels.size(); i++) {
-        int j = newLabels[i];
+    for(int i = 0; i < newLabels.size(); ++i) {
+        j = newLabels[i];
         ofLine(j, 8, j, 12);
     }
     ofSetColor(ofColor::white);
-    for(int i = 0; i < deadLabels.size(); i++) {
-        int j = deadLabels[i];
+    for(int i = 0; i < deadLabels.size(); ++i) {
+        j = deadLabels[i];
         ofLine(j, 12, j, 16);
     }
 }
