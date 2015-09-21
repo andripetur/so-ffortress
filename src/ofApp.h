@@ -7,6 +7,7 @@
 #include "string.h"
 #include "ofxGui.h"
 #include "pointCloudStitcher.h"
+#include "colorNamer.h"
 
 #define HOST "localhost"
 #define PORT 12345
@@ -22,7 +23,6 @@ public:
 	void keyPressed(int key);
     
     ofColor avgColor(ofRectangle area, float offsetRatio);
-    string colorNamer(ofColor toBeNamed);
     void setupGui();
     void oscSender();
     void drawContFinder();
@@ -48,8 +48,9 @@ public:
     bool bForgetBackground;	
     
     ofxOscSender sender;
+    colorNamer clrNamer; 
 	
     ofColor testColor;
-    // blob label, color of blob
-    map<int, ofColor> blockColors;
+    bool bColorChanged; 
+    string colorName; 
 };

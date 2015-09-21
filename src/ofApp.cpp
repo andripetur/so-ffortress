@@ -3,6 +3,10 @@
 //--------------------------------------------------------------
 void ofApp::setup() {
     kinect.setup();
+    clrNamer.setup();
+    cout << clrNamer.numCols << endl;
+    
+    ofSetLogLevel(OF_LOG_SILENT);
     
     // allocate space for compVis shiznit
     grayImage.allocate(kinect.width, kinect.height);
@@ -26,7 +30,6 @@ void ofApp::setup() {
     contFinder.getTracker().setMaximumDistance(32);
     
 	ofSetFrameRate(60);
-        
     // open an outgoing OSC connection to HOST:PORT
     sender.setup(HOST, PORT);
     
@@ -92,7 +95,7 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::oscSender(){
-#define SHOW_SENDER_DEBUG
+//#define SHOW_SENDER_DEBUG
     ofxCv::RectTracker& tracker = contFinder.getTracker();
     const vector<unsigned int>& newLabels = tracker.getNewLabels();
     const vector<unsigned int>& deadLabels = tracker.getDeadLabels();
@@ -100,6 +103,7 @@ void ofApp::oscSender(){
     ofPoint loc;
     ofRectangle area;
     int label;
+    ofPixelsRef patchedImagePixRef = patchedImageCv.getPixelsRef();
     
     // new block = /newBlob <label> <color>
     for(int i=0; i< newLabels.size(); ++i){
@@ -110,7 +114,7 @@ void ofApp::oscSender(){
         sender.sendMessage(m);
     }
     
-    // block update = /currentBlob <label> <area> <age> <x> <y>
+    // block update = /currentBlob <label> <area> <age> <x> <y> <z>
     for(int i=0; i<contFinder.size(); ++i){
         ofxOscMessage m;
         m.setAddress("/currentBlob");
@@ -121,6 +125,7 @@ void ofApp::oscSender(){
         loc = ofxCv::toOf(contFinder.getCenter(i));
         m.addIntArg(loc.x);                                    // x
         m.addIntArg(loc.y);                                    // y
+        m.addIntArg( patchedImagePixRef.getColor(loc.x, loc.y).getBrightness()); // z
         sender.sendMessage(m);
     }
     
@@ -172,59 +177,6 @@ ofColor ofApp::avgColor(ofRectangle area, float offsetRatio){
 }
 
 //--------------------------------------------------------------
-string ofApp::colorNamer(ofColor tBn){
-    int r = tBn.r;
-    int g = tBn.g;
-    int b = tBn.b;
-    string colorName;
-    
-    if(tBn == ofColor(0)){ // check if black
-        colorName = "black";
-    } else if( tBn == ofColor(255) ){ // check if white
-        colorName = "white";
-    } else {
-        if(r == g && r == b){       // if r,g,b are same = grey
-            colorName = "gray";
-        } else {
-            int grens = 20;
-            if(r > b) {
-                if(abs(r-g) < grens){
-                    colorName = "yellow";
-                } else if( r > g ){
-                    colorName = "red";
-                }
-                if(abs(b - r) < grens){
-                    colorName == "Violet";
-                }
-            }
-            
-            if( g > r ){
-                if(abs(g - b) < grens) {
-                    if( g > 56 ){
-                        colorName = "blue";
-                    } else {
-                        colorName = "green";
-                    }
-                } else if(g > b) {
-                    colorName = "green";
-                }
-            }
-            
-            if( b>g ){
-                if(abs(b - r) < grens){
-                    colorName == "Violet";
-                } else if( b>r ){
-                    colorName = "blue";
-                }
-            }
-            
-        }
-
-    }
-    
-    return colorName;
-}
-
 void ofApp::drawContFinder(){
     ofSetBackgroundAuto(bShowLabels);
     ofxCv::RectTracker& tracker = contFinder.getTracker();
@@ -311,23 +263,35 @@ void ofApp::draw() {
             drawContFinder();
         ofPopMatrix();
         
-        // Find color of blob and draw it
-        ofRectangle boundingRect;
-        ofColor temp;
-        if( contFinder.size() > 0) {
-            for(int i=0; i<contFinder.size(); ++i){
-                boundingRect = ofxCv::toOf(contFinder.getBoundingRect(i));
-                if(boundingRect.getCenter().y > kinect.height * 0.5){
-                    ofSetColor( (temp = avgColor(boundingRect, 0 )) );
-                    ofRect(420, 320, 400, 300);
-//                    cout
-//                    << "r: " << (int)temp.r
-//                    << " b: " << (int)temp.b
-//                    << " g: " << (int)temp.g << endl;
-                }
-//                ofDrawBitmapString(colorNamer(temp), 420, 320); // draw name of color
-            }
+//        // Find color of blob and draw it
+//        ofRectangle boundingRect;
+//        ofColor temp;
+//        if( contFinder.size() > 0) {
+//            for(int i=0; i<contFinder.size(); ++i){
+//                boundingRect = ofxCv::toOf(contFinder.getBoundingRect(i));
+//                if(boundingRect.getCenter().y > kinect.height * 0.5){
+//                    ofSetColor( (temp = avgColor(boundingRect, 0 )) );
+//                    ofRect(420, 320, 400, 300);
+////                    cout
+////                    << "r: " << (int)temp.r
+////                    << " b: " << (int)temp.b
+////                    << " g: " << (int)temp.g << endl;
+//                }
+////                ofDrawBitmapString(colorNamer(temp), 420, 320); // draw name of color
+//            }
+//        }
+        
+        ofSetColor(testColor);
+        ofRect(420, 320, 400, 300);
+//        ofDrawBitmapString(colorNamer(testColor), 420, 300); // draw name of color
+        if(bColorChanged){
+        cout << "color name: "
+        << " R: " << (int)testColor.r
+        << " B: " << (int)testColor.b
+        << " G: " << (int)testColor.g << endl;
+            bColorChanged = false;
         }
+        
 	}
 
 	// draw instructions
@@ -373,6 +337,12 @@ void ofApp::keyPressed (int key) {
         case'l':
         case'L':
             bShowLabels = !bShowLabels;
+            break;
+            
+        case'r':
+        case'R':
+            testColor = ofColor(ofRandom(255),ofRandom(255),ofRandom(255));
+            bColorChanged = true;
             break;
 	}
 }
