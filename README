@@ -6,3 +6,4 @@ work in progress: interactive sound blocks
 Dependencies: 
 of_0.8.4
 ofxCv
+ofxCsv

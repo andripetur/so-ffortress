@@ -15,12 +15,17 @@ void colorNamer::setup(){
     colorList.loadFile("/Applications/of_v0.8.4_osx_release/apps/ffortress/ffortress/bin/data/ral_colors.csv", ",", "#" );
     vector<string> rgb;
     collumn temp;
+    ofColor lab;
+
     for(int i=0; i<colorList.numRows; ++i){
-        temp.raiId = colorList.getInt(i, 0);
+        //get rai xxx id, and strip "rai "
+        temp.raiId = ofToInt(colorList.getString(i, 0).erase(0, 4));
         rgb = colorList.getFromString( colorList.getString(i, 1), "-" );
         for(int j=0; j<3; ++j) temp.rgb[j] = ofToInt(rgb[j]);
         temp.hexCode = colorList.getString(i, 2);
         for(int j=0; j<NR_OF_LANGUAGES; ++j) temp.colorName[j] = colorList.getString(i, 3+j);
+        lab = ofxCv::convertColor(ofColor( temp.rgb[0], temp.rgb[1], temp.rgb[2] ), CV_RGB2Lab);
+        for(int j=0; j<3; ++j) temp.lab[j] = lab[j];
         
         row.push_back(temp);
         rgb.clear();
@@ -29,9 +34,58 @@ void colorNamer::setup(){
 }
 
 string colorNamer::nameColor(ofColor nameMe, lang language){
+    string colorName;
+    int rowNr = findRowOfNearestColor(nameMe);
+    colorName = row[rowNr].colorName[language];
+    
+    return colorName;
 }
 
-string colorNamer::nameColorGroup(ofColor nameMe){}
+string colorNamer::nameColorGroup(ofColor nameMe){
+    string colorGroup;
+    int rowNr = findRowOfNearestColor(nameMe);
+    colorGroup = raiIDtoColorGroup( row[rowNr].raiId );
+    return colorGroup; 
+}
+
+string colorNamer::getGroupOfLastFoundColor(){
+    string colorGroup;
+    colorGroup = raiIDtoColorGroup( row[lastFoundColorRow].raiId );
+    return colorGroup;
+}
+
+int colorNamer::findRowOfNearestColor(ofColor nameMe){
+    float smallestDistance = MAXFLOAT;
+    int smallestDistanceRow = 0;
+    float currDistance = 0;
+    ofColor lab;
+    
+//     distance in rgb color space
+//        for(int i=0;i<numRows;++i){
+//            currDistance =pow(((nameMe.r-row[i].rgb[0])*0.30),2)
+//                        + pow(((nameMe.g-row[i].rgb[1])*0.59),2)
+//                        + pow(((nameMe.b-row[i].rgb[2])*0.11),2);
+//            if(currDistance < smallestDistance){
+//                smallestDistance = currDistance;
+//                smallestDistanceRow = i;
+//            }
+//        }
+    
+    // distance in Lab colorspace
+    lab = ofxCv::convertColor(nameMe, CV_RGB2Lab);
+    for(int i=0;i<numRows;++i){
+        currDistance = pow((float)(lab.r-row[i].lab[0]),2)
+        + pow((float)(lab.g-row[i].lab[1]),2)
+        + pow((float)(lab.b-row[i].lab[2]),2);
+        if(currDistance < smallestDistance){
+            smallestDistance = currDistance;
+            smallestDistanceRow = i;
+        }
+    }
+    
+    lastFoundColorRow = smallestDistanceRow;
+    return smallestDistanceRow;
+}
 
 string colorNamer::raiIDtoColorGroup(int ID){
     int id = floor(ID/1000);
@@ -62,6 +116,17 @@ string colorNamer::raiIDtoColorGroup(int ID){
             break;
     }
     return colorGroup;
+}
+
+ofColor colorNamer::getColorByName(string clr, lang language){
+    ofColor color;
+    for(int i=0;i<numRows;++i){
+        if(clr == row[i].colorName[language]){
+            color = ofColor(row[i].rgb[0],row[i].rgb[1], row[i].rgb[2] );
+            i = numRows; 
+        }
+    }
+    return color;
 }
 
 string colorNamer::nameColorConditional(ofColor nameMe){

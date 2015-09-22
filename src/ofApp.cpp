@@ -4,7 +4,6 @@
 void ofApp::setup() {
     kinect.setup();
     clrNamer.setup();
-    cout << clrNamer.numCols << endl;
     
     ofSetLogLevel(OF_LOG_SILENT);
     
@@ -280,10 +279,16 @@ void ofApp::draw() {
 ////                ofDrawBitmapString(colorNamer(temp), 420, 320); // draw name of color
 //            }
 //        }
-        
+//        testColor = ofColor(214, 199, 148);
+    
         ofSetColor(testColor);
         ofRect(420, 320, 400, 300);
-//        ofDrawBitmapString(colorNamer(testColor), 420, 300); // draw name of color
+        ofDrawBitmapString( (colorName = clrNamer.nameColor(testColor, ENGLISH)), 420, 300 );
+        ofSetColor( clrNamer.getColorByName(colorName, ENGLISH));
+        ofRect(10, 320, 400, 300);
+        ofDrawBitmapString( clrNamer.getGroupOfLastFoundColor() , 10, 300);
+        
+        
         if(bColorChanged){
         cout << "color name: "
         << " R: " << (int)testColor.r
