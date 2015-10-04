@@ -164,6 +164,7 @@
 		14AAB7E81BB0880100B7E754 /* ofxCsv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxCsv.h; sourceTree = "<group>"; };
 		14CCB40E1BB098030092931F /* colorNamer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = colorNamer.cpp; sourceTree = "<group>"; };
 		14CCB40F1BB098030092931F /* colorNamer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = colorNamer.h; sourceTree = "<group>"; };
+		14D52FFD1BBD358A0049641E /* ral_colors.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = ral_colors.csv; path = bin/data/ral_colors.csv; sourceTree = "<group>"; };
 		14DD891F1BAAFA2D00BC1F70 /* pointCloudStitcher.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pointCloudStitcher.cpp; sourceTree = "<group>"; };
 		14DD89201BAAFA2D00BC1F70 /* pointCloudStitcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pointCloudStitcher.h; sourceTree = "<group>"; };
 		1E95EFD35ED9C5D97F2F015E /* timer.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = timer.h; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/timer.h; sourceTree = SOURCE_ROOT; };
@@ -1067,6 +1068,7 @@
 				BB4B014C10F69532006C3DED /* addons */,
 				E45BE5980E8CC70C009D7055 /* frameworks */,
 				E4B69B5B0A3A1756003C02F2 /* ffortressDebug.app */,
+				14D52FFD1BBD358A0049641E /* ral_colors.csv */,
 			);
 			sourceTree = "<group>";
 		};

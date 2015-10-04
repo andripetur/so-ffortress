@@ -9,7 +9,8 @@
 #include "pointCloudStitcher.h"
 #include "colorNamer.h"
 
-#define HOST "localhost"
+//#define HOST "localhost"
+#define HOST "169.254.97.135"
 #define PORT 12345
 
 class ofApp : public ofBaseApp {
@@ -22,7 +23,9 @@ public:
 		
 	void keyPressed(int key);
     
-    ofColor avgColor(ofRectangle area, float offsetRatio);
+    ofColor avgColor(ofRectangle area);
+    string lastFoundColorGroup;
+
     void setupGui();
     void oscSender();
     void drawContFinder();
@@ -33,24 +36,20 @@ public:
     ofxPanel gui;
     ofParameter<bool> bShowInfo;
     ofParameter<int> minArea;
+    ofParameter<string> host; 
     bool bShowLabels;
     
     //CompVisionShizNit
     ofxCv::ContourFinder    contFinder;
     ofxCvGrayscaleImage     patchedImageCv;
-    ofxCvGrayscaleImage     grayImage;
     ofxCvGrayscaleImage     grayDiffOfImage;
     ofxCvGrayscaleImage 	grayDiff;
     ofxCvGrayscaleImage     bgImage;
-
+    
     bool bLearnBackground;
     bool bBackgroundLearned;
     bool bForgetBackground;	
     
     ofxOscSender sender;
     colorNamer clrNamer; 
-	
-    ofColor testColor;
-    bool bColorChanged; 
-    string colorName; 
 };

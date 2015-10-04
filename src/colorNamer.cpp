@@ -91,21 +91,26 @@ string colorNamer::raiIDtoColorGroup(int ID){
     int id = floor(ID/1000);
     string colorGroup;
     switch (id) {
-        case 1: colorGroup = "Beige and yellow";
+        case 1: colorGroup = "yellow"; //beige and yellow
             break;
-        case 2: colorGroup = "orange";
-            break;
+        case 2:
+//            colorGroup = "orange";
+//            break;
         case 3: colorGroup = "red";
             break;
-        case 4: colorGroup = "violet";
+        case 4:
+//            colorGroup = "violet";
+//
             break;
+        case 7:
+        case 8:
         case 5: colorGroup = "blue";
             break;
         case 6: colorGroup = "green";
             break;
-        case 7: colorGroup = "gray";
-            break;
-        case 8: colorGroup = "brown";
+//        case 7: colorGroup = "gray";
+//            break;
+//        case 8: colorGroup = "brown";
             break;
         case 9:
             if(ID == 9004 ||ID == 9005 ||ID == 9011 ||ID == 9017){

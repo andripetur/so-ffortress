@@ -47,7 +47,7 @@ public:
     vector<collumn> row; 
     
     int numCols, numRows;
-    int lastFoundColorRow; 
+    int lastFoundColorRow;
 private:
     // finds closest color, returns row
     int findRowOfNearestColor(ofColor nameMe);

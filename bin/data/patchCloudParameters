@@ -14,6 +14,7 @@
 	<Kinect_Far_Clipping>0</Kinect_Far_Clipping>
 	<Point_Cloud_Far_Clipping>0</Point_Cloud_Far_Clipping>
 	<P.C._Far_Clip>0</P.C._Far_Clip>
+	<FrameSmoothing>1</FrameSmoothing>
 	</PatchCloudParameters>
 <group/>
 <info>0</info>
@@ -31,4 +32,6 @@
 		<Mouse_Input>1</Mouse_Input>
 	</viewpPointCloudParams.>
 <cvFarClip>255</cvFarClip>
+<host>169.254.97.135</host>
+<FrameSmoothing>0</FrameSmoothing>
 </group>

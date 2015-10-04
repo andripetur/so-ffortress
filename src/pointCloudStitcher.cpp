@@ -19,10 +19,19 @@ void pointCloudStitcher::setup(){
         kinect[i].setCameraTiltAngle(angle);
         
         grayImage[i].allocate(kinect[0].width, kinect[0].height);
+        colorImage[i].allocate(kinect[0].width, kinect[0].height);
     }
     width = kinect[0].width;
     height = kinect[0].height;
     patchedImageCv.allocate(kinect[0].width, kinect[0].height);
+    patchedImageColor.allocate(kinect[0].width, kinect[0].height);
+    
+    frameCount = 0;
+    bNewAccumedFrame = false;
+    for(int i=0; i<N_FRAMES+1; ++i){
+        frames[i].allocate(width, height);
+        clrFrames[i].allocate(width, height);
+    }
     
     // start from the front
     bDrawPointCloud = false;
@@ -38,6 +47,8 @@ void pointCloudStitcher::setupParameters(){
     patchCloudParameters.add(transformConstant.set("transformConstant", 1, 0, 10));
     patchCloudParameters.add(kinectDistance.set("Kinect Distance", 0, 0, 1000));
     patchCloudParameters.add(kinectDistanceY.set("Kinect Distance Y", 0, -100, 100));
+    patchCloudParameters.add(bUseFrameSmoothing.set("FrameSmoothing", true));
+
     viewPointCloudParameters.setName("viewpPointCloudParams.");
     viewPointCloudParameters.add(pointCloudFarClipping.set("P.C. Far Clip", 0, 0, 10000));
     viewPointCloudParameters.add(stepSize.set("stepSize", 4, 1, 10));
@@ -62,15 +73,97 @@ void pointCloudStitcher::update(){
         for(int i=0;i<amt;++i){
             // load grayscale depth image from the kinect source
             grayImage[i].setFromPixels(kinect[i].getDepthPixels(), kinect[i].width, kinect[i].height);
-            
+            colorImage[i].setFromPixels(kinect[i].getPixels(), kinect[i].width, kinect[i].height);
         }
-        hasNewFrame = true;
+        
+        float ** adj;
+        adj = adjustPointClouds(&kinect[0], &kinect[1]);
+        
+        mergeGrayImages(grayImage[0], grayImage[1], adj);
+        mergeColorImages(colorImage[0], colorImage[1], adj);
+        
+        if(bUseFrameSmoothing){
+            frames[frameCount] = patchedImageCv;
+            clrFrames[frameCount] = patchedImageColor;
+            
+            frameCount++;
+            frameCount %= N_FRAMES;
+            if(frameCount == 0) bNewAccumedFrame = true;
+            
+            if(bNewAccumedFrame){
+                frameSmoother();
+                patchedImageCv = frames[N_FRAMES];
+                bNewAccumedFrame = false;
+            }
+            hasNewFrame = true;
+        } else {
+            hasNewFrame = true;
+        }
     }
-    float ** adj;
-    adj = adjustPointClouds(&kinect[0], &kinect[1]);
-    
-    mergeGrayImages(grayImage[0], grayImage[1], adj);
+}
 
+void pointCloudStitcher::frameSmoother(){
+    static bool bFirstTime = true;
+    static int ** pixels;
+    static int *** clrPixels;
+    static ofPixels pixs;
+    static ofPixels clrPixs;
+    // make array
+    if(bFirstTime){
+        pixels = new int *[width];
+        clrPixels = new int **[width];
+        pixs.allocate(width, height, 1);
+        clrPixs.allocate(width, height, 3); 
+        
+        for(int i = 0; i<width; ++i){
+            pixels[i] = new int [height];
+            clrPixels[i] = new int *[height];
+        }
+    
+        for(int x=0; x<width; ++x){
+            for(int y=0; y<height; ++y){
+                clrPixels[x][y] = new int[3];
+            }
+        }
+        
+        bFirstTime = false;
+    }
+    
+    // reset arrays to zero
+    for(int y = 0; y < height; ++y ) {
+        for(int x = 0; x < width; ++x) {
+            pixels[x][y] = 0;
+            for(int c=0; c<3; ++c){
+                clrPixels[x][y][c] = 0;
+            }
+        }
+    }
+    
+    // add and then divide by n
+    for(int n=0; n<N_FRAMES; ++n) {
+        ofPixelsRef frame = frames[n].getPixelsRef();
+        ofPixelsRef clrFrame = clrFrames[n].getPixelsRef();
+        
+        for(int y = 0; y < height; ++y ) {
+            for(int x = 0; x < width; ++x) {
+                pixels[x][y] += frame.getColor(x, y)[0];
+                for(int c=0; c<3; ++c){
+                    clrPixels[x][y][c] += clrFrame.getColor(x, y)[c];
+                }
+                if(n == N_FRAMES-1){
+                    pixs.setColor(x, y, ofColor( pixels[x][y]/N_FRAMES));
+                    clrPixs.setColor(x, y, ofColor(
+                                                   clrPixels[x][y][0]/N_FRAMES,
+                                                   clrPixels[x][y][1]/N_FRAMES,
+                                                   clrPixels[x][y][2]/N_FRAMES  ) );
+                }
+            }
+        }
+    }
+    
+    // store output in last array index.
+    frames[N_FRAMES].setFromPixels(pixs);
+    clrFrames[N_FRAMES].setFromPixels(clrPixs);
 }
 
 void pointCloudStitcher::draw(){
@@ -85,6 +178,8 @@ void pointCloudStitcher::draw(){
         
         kinect[0].draw(10, 160, 200, 150); //rgb
         kinect[1].draw(210, 160, 200, 150); //rgb
+        
+        patchedImageColor.draw(10, 310, 400, 300); // merged ColorImage
     }
 }
 
@@ -151,20 +246,36 @@ float** pointCloudStitcher::adjustPointClouds(ofxKinect* kinectOnePtr, ofxKinect
     return adjustments;
 }
 
-void pointCloudStitcher::mergeGrayImages(ofxCvGrayscaleImage imgOne, ofxCvGrayscaleImage imgTwo, float ** adj){
-    ofPoint tempPointCurrent;
+void pointCloudStitcher::mergeGrayImages(ofxCvGrayscaleImage imgOne, ofxCvGrayscaleImage imgTwo, float **adj){
     ofPixelsRef imgOnePix = imgOne.getPixelsRef();
     ofPixelsRef imgTwoPix = imgTwo.getPixelsRef();
-    int offset;
+    
+    patchedImageCv.setFromPixels(merge(imgOnePix, imgTwoPix, adj, imgOne.width, imgTwo.height));
+}
+
+void pointCloudStitcher::mergeColorImages(ofxCvColorImage imgOne, ofxCvColorImage imgTwo, float **adj){
+    ofPixelsRef imgOnePix = imgOne.getPixelsRef();
+    ofPixelsRef imgTwoPix = imgTwo.getPixelsRef();
+    
+    patchedImageColor.setFromPixels(merge(imgOnePix, imgTwoPix, adj, imgOne.width, imgTwo.height));
+}
+
+ofPixelsRef pointCloudStitcher::merge(ofPixelsRef imgOnePix, ofPixelsRef imgTwoPix, float **adj, int width, int height){
+    ofPoint tempPointCurrent;
+
+    int offsetX, offsetY;
     int brightnessOne, brightness;
-    for(int y = 0; y < imgTwo.getHeight(); ++y) {
-        for(int x = 0; x < imgTwo.getWidth(); ++x) {
+    for(int y = 0; y < height; ++y) {
+        for(int x = 0; x < width; ++x) {
             brightnessOne = imgTwoPix.getColor(x, y).getBrightness();
             if(brightnessOne>0) {
-                offset = int(x * adj[x][y]);
-                if(offset < imgOne.getWidth() && offset > 0) {
-                    if( (brightness = imgOnePix.getColor(offset, y+kinectDistanceY).r) < brightnessOne ){
-                        imgOnePix.setColor(offset, y+kinectDistanceY, imgTwoPix.getColor(x, y));
+                offsetX = int(x * adj[x][y]);
+                offsetY = y+kinectDistanceY;
+                if(offsetX < width && offsetX > 0) {
+                    if(offsetY < height && offsetY > 0){
+                        if( imgOnePix.getColor(offsetX, offsetY).r > brightnessOne ){
+                            imgOnePix.setColor(offsetX, offsetY, imgTwoPix.getColor(x, y));
+                        }
                     }
                 }
                 
@@ -172,8 +283,7 @@ void pointCloudStitcher::mergeGrayImages(ofxCvGrayscaleImage imgOne, ofxCvGraysc
         }
     }
     
-    patchedImageCv.setFromPixels(imgOnePix.getPixels(), imgOne.width, imgOne.height);
-    patchedImageCv.flagImageChanged();
+    return imgOnePix;
 }
 
 //--------------------------------------------------------------
@@ -220,6 +330,11 @@ void pointCloudStitcher::keyListener(ofKeyEventArgs & a){
             }
             break;
             
+        case'u':
+        case'U':
+            bUseFrameSmoothing = !bUseFrameSmoothing;
+            break;
+            
         case OF_KEY_UP:
             angle++;
             if(angle>30) angle=30;
@@ -250,6 +365,12 @@ bool pointCloudStitcher::getHasNewFrame(){
 }
 ofxCvGrayscaleImage pointCloudStitcher::getPatchedCvImage(){
     return patchedImageCv;
+}
+ofxCvColorImage pointCloudStitcher::getPatcheColorImage(){
+    return patchedImageColor;
+}
+ofColor pointCloudStitcher::getPatchedColorAt(int x, int y){
+    return patchedImageColor.getPixelsRef().getColor(x, y);
 }
 ofColor pointCloudStitcher::getColorAt(int x, int y){
     return kinect[0].getColorAt(x, y);

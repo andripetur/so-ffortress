@@ -8,7 +8,7 @@ void ofApp::setup() {
     ofSetLogLevel(OF_LOG_SILENT);
     
     // allocate space for compVis shiznit
-    grayImage.allocate(kinect.width, kinect.height);
+    patchedImageCv.allocate(kinect.width, kinect.height);
     grayDiff.allocate(kinect.width, kinect.height);
     grayDiffOfImage.allocate(kinect.width, kinect.height);
     bgImage.allocate(kinect.width, kinect.height);
@@ -21,14 +21,14 @@ void ofApp::setup() {
     contFinder.setMinArea(100);
     contFinder.setMaxArea((kinect.width*kinect.height)/2);
     contFinder.setThreshold(5);
-//    contFinder.setFindHoles(false);
+    contFinder.setFindHoles(false);
 
     // wait for a frame before forgetting something
     contFinder.getTracker().setPersistence(30);
     // an object can move up to 32 pixels per frame
     contFinder.getTracker().setMaximumDistance(32);
     
-	ofSetFrameRate(60);
+//	ofSetFrameRate(10);
     // open an outgoing OSC connection to HOST:PORT
     sender.setup(HOST, PORT);
     
@@ -42,6 +42,7 @@ void ofApp::setupGui(){
     gui.add(kinect.viewPointCloudParameters);
     gui.add(bShowInfo.set("info", false));
     gui.add(minArea.set("cvMinArea", 100, 50, 300));
+    gui.add(host.set("host", HOST));
     gui.setPosition(820, 10);
     gui.saveToFile("patchCloudParameters");
 }
@@ -51,43 +52,43 @@ void ofApp::update() {
     kinect.update();
     
     if(kinect.getHasNewFrame()){
-        grayImage = kinect.getPatchedCvImage(); // get the merged cvImage from the two kinects
-        
-        // set new background image
-        if(bLearnBackground){
-            bgImage = grayImage;   // let this frame be the background image from now on
-            bLearnBackground = false;
-            bBackgroundLearned = true;
-        }
-        
-        // forget background image
-        if(bForgetBackground){
-            bBackgroundLearned = false;
-            bForgetBackground = false;
-        }
-        // set minimal blob area
-        contFinder.setMinArea(minArea);
-        
-        grayImage.flagImageChanged();
-        if(bBackgroundLearned){
-            cvAbsDiff(bgImage.getCvImage(), grayImage.getCvImage(), grayDiff.getCvImage());
-            cvErode(grayDiff.getCvImage(), grayDiff.getCvImage(), NULL, 2);
-            cvDilate(grayDiff.getCvImage(), grayDiff.getCvImage(), NULL, 1);
-            // threshold ignoring little differences
-            cvThreshold(grayDiff.getCvImage(), grayDiff.getCvImage(), 4, 255, CV_THRESH_BINARY);
-            grayDiff.flagImageChanged();
-            // update the ofImage to be used as background mask for the blob finder
-            grayDiffOfImage.setFromPixels(grayDiff.getPixels(), kinect.width, kinect.height);
-            
-            // update the cv images
-            grayDiffOfImage.flagImageChanged();
+            patchedImageCv = kinect.getPatchedCvImage(); // get the merged cvImage from the two kinects
 
-            // pass image on to contour finder
-            contFinder.findContours(grayDiffOfImage.getCvImage());
-        } else {
-            contFinder.findContours(grayImage.getCvImage());
-        }//backGroundLearned
-    }
+            // set new background image
+            if(bLearnBackground){
+                bgImage = patchedImageCv;   // let this frame be the background image from now on
+                bLearnBackground = false;
+                bBackgroundLearned = true;
+            }
+            
+            // forget background image
+            if(bForgetBackground){
+                bBackgroundLearned = false;
+                bForgetBackground = false;
+            }
+            // set minimal blob area
+            contFinder.setMinArea(minArea);
+            
+            patchedImageCv.flagImageChanged();
+            if(bBackgroundLearned){
+                cvAbsDiff(bgImage.getCvImage(), patchedImageCv.getCvImage(), grayDiff.getCvImage());
+                cvErode(grayDiff.getCvImage(), grayDiff.getCvImage(), NULL, 2);
+                cvDilate(grayDiff.getCvImage(), grayDiff.getCvImage(), NULL, 1);
+                // threshold ignoring little differences
+                cvThreshold(grayDiff.getCvImage(), grayDiff.getCvImage(), 4, 255, CV_THRESH_BINARY);
+                grayDiff.flagImageChanged();
+                // update the ofImage to be used as background mask for the blob finder
+                grayDiffOfImage.setFromPixels(grayDiff.getPixels(), kinect.width, kinect.height);
+                
+                // update the cv images
+                grayDiffOfImage.flagImageChanged();
+
+                // pass image on to contour finder
+                contFinder.findContours(grayDiffOfImage.getCvImage());
+            } else {
+                contFinder.findContours(patchedImageCv.getCvImage());
+            }//backGroundLearned
+        }
     
     oscSender();
 }
@@ -102,15 +103,23 @@ void ofApp::oscSender(){
     ofPoint loc;
     ofRectangle area;
     int label;
-    ofPixelsRef patchedImagePixRef = patchedImageCv.getPixelsRef();
-    
+    ofPixelsRef patchedImagePixRef = patchedImageCv.getPixelsRef(); // getPathcedImage
+    ofColor tempClr;
+    string colorName;
     // new block = /newBlob <label> <color>
     for(int i=0; i< newLabels.size(); ++i){
         ofxOscMessage m;
         m.setAddress("/newBlob");
         m.addIntArg(newLabels[i]);      // label
-        m.addStringArg("/color");       // color
+        area = ofxCv::toOf( contFinder.getBoundingRect(i) ); // get area of blob
+        tempClr = avgColor(area);                         // avg color of blob area
+        cout << (colorName = clrNamer.nameColorGroup(tempClr) ) <<endl;
+        if(colorName.length() == 0){
+            colorName = lastFoundColorGroup;
+        }
+        m.addStringArg( colorName );     // send dat color name
         sender.sendMessage(m);
+        lastFoundColorGroup = colorName;
     }
     
     // block update = /currentBlob <label> <area> <age> <x> <y> <z>
@@ -143,21 +152,23 @@ void ofApp::oscSender(){
 }
 
 //--------------------------------------------------------------
-ofColor ofApp::avgColor(ofRectangle area, float offsetRatio){
+ofColor ofApp::avgColor(ofRectangle area){
+
     ofColor avgColor, currColor;
     ofPixelsRef greyDiffPix = grayDiffOfImage.getPixelsRef();
     unsigned int r, g, b;
     r = g = b = 0;
     int numberOfColoredPixels = 0;
-    int horisontalOffset = int(area.width*offsetRatio);
-    int verticalOffset = int(area.height*offsetRatio);
+
     int stepSize = 5;
+    int xloc, yloc;
     
-    for(int x=horisontalOffset; x<area.width-horisontalOffset; x+=stepSize){
-        for(int y=verticalOffset; y<area.height-verticalOffset; y+=stepSize){
-            
-            if(greyDiffPix.getColor(x, y) != ofColor(0,0,0)){ //only check color of nonblack areas in the blob
-                currColor = kinect.getColorAt(area.x + x, area.y + y);
+    for(int x=0; x<area.width; x+=stepSize){
+        for(int y=0; y<area.height; y+=stepSize){
+            xloc = area.getTopLeft().x + x;
+            yloc = area.getTopLeft().y + y;
+            if(greyDiffPix.getColor(xloc, yloc).getBrightness() != 0){
+                currColor = kinect.getPatchedColorAt(xloc, yloc);
                 r+= currColor.r;
                 g+= currColor.g;
                 b+= currColor.b;
@@ -165,13 +176,16 @@ ofColor ofApp::avgColor(ofRectangle area, float offsetRatio){
             }
         }
     }
+    
     if(numberOfColoredPixels != 0){
         avgColor = ofColor(r/(float)numberOfColoredPixels,
                            g/(float)numberOfColoredPixels,
                            b/(float)numberOfColoredPixels);
     } else {
-        avgColor = ofColor(r, g, b);
+//        avgColor = ofColor(r, g, b);
+        avgColor.blue;
     }
+    
     return avgColor;
 }
 
@@ -185,7 +199,7 @@ void ofApp::drawContFinder(){
         if(bBackgroundLearned){
             grayDiffOfImage.draw(0,0);
         } else {
-            grayImage.draw(0, 0);
+            patchedImageCv.draw(0, 0);
         }
         contFinder.draw();
         for(int i = 0; i < contFinder.size(); ++i) {
@@ -218,33 +232,6 @@ void ofApp::drawContFinder(){
             }
         }
     }
-    
-    // this chunk of code visualizes the creation and destruction of labels
-    const vector<unsigned int>& currentLabels = tracker.getCurrentLabels();
-    const vector<unsigned int>& previousLabels = tracker.getPreviousLabels();
-    const vector<unsigned int>& newLabels = tracker.getNewLabels();
-    const vector<unsigned int>& deadLabels = tracker.getDeadLabels();
-    ofSetColor(ofxCv::cyanPrint);
-    int j;
-    for(int i = 0; i < currentLabels.size(); ++i) {
-        j = currentLabels[i];
-        ofLine(j, 0, j, 4);
-    }
-    ofSetColor(ofxCv::magentaPrint);
-    for(int i = 0; i < previousLabels.size(); ++i) {
-        j = previousLabels[i];
-        ofLine(j, 4, j, 8);
-    }
-    ofSetColor(ofxCv::yellowPrint);
-    for(int i = 0; i < newLabels.size(); ++i) {
-        j = newLabels[i];
-        ofLine(j, 8, j, 12);
-    }
-    ofSetColor(ofColor::white);
-    for(int i = 0; i < deadLabels.size(); ++i) {
-        j = deadLabels[i];
-        ofLine(j, 12, j, 16);
-    }
 }
 
 //--------------------------------------------------------------
@@ -261,43 +248,7 @@ void ofApp::draw() {
             ofScale(0.625, 0.625);
             drawContFinder();
         ofPopMatrix();
-        
-//        // Find color of blob and draw it
-//        ofRectangle boundingRect;
-//        ofColor temp;
-//        if( contFinder.size() > 0) {
-//            for(int i=0; i<contFinder.size(); ++i){
-//                boundingRect = ofxCv::toOf(contFinder.getBoundingRect(i));
-//                if(boundingRect.getCenter().y > kinect.height * 0.5){
-//                    ofSetColor( (temp = avgColor(boundingRect, 0 )) );
-//                    ofRect(420, 320, 400, 300);
-////                    cout
-////                    << "r: " << (int)temp.r
-////                    << " b: " << (int)temp.b
-////                    << " g: " << (int)temp.g << endl;
-//                }
-////                ofDrawBitmapString(colorNamer(temp), 420, 320); // draw name of color
-//            }
-//        }
-//        testColor = ofColor(214, 199, 148);
-    
-        ofSetColor(testColor);
-        ofRect(420, 320, 400, 300);
-        ofDrawBitmapString( (colorName = clrNamer.nameColor(testColor, ENGLISH)), 420, 300 );
-        ofSetColor( clrNamer.getColorByName(colorName, ENGLISH));
-        ofRect(10, 320, 400, 300);
-        ofDrawBitmapString( clrNamer.getGroupOfLastFoundColor() , 10, 300);
-        
-        
-        if(bColorChanged){
-        cout << "color name: "
-        << " R: " << (int)testColor.r
-        << " B: " << (int)testColor.b
-        << " G: " << (int)testColor.g << endl;
-            bColorChanged = false;
-        }
-        
-	}
+    }
 
 	// draw instructions
     if(bShowInfo){
@@ -342,12 +293,6 @@ void ofApp::keyPressed (int key) {
         case'l':
         case'L':
             bShowLabels = !bShowLabels;
-            break;
-            
-        case'r':
-        case'R':
-            testColor = ofColor(ofRandom(255),ofRandom(255),ofRandom(255));
-            bColorChanged = true;
             break;
 	}
 }
