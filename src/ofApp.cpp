@@ -28,7 +28,7 @@ void ofApp::setup() {
     // an object can move up to 32 pixels per frame
     contFinder.getTracker().setMaximumDistance(32);
     
-//	ofSetFrameRate(10);
+	ofSetFrameRate(10);
     // open an outgoing OSC connection to HOST:PORT
     sender.setup(HOST, PORT);
     
@@ -43,6 +43,13 @@ void ofApp::setupGui(){
     gui.add(bShowInfo.set("info", false));
     gui.add(minArea.set("cvMinArea", 100, 50, 300));
     gui.add(host.set("host", HOST));
+    
+    searchZonePmGroup.setName("SearchZonePms");
+    searchZonePmGroup.add(bSearchZoneOn.set("SearchZoneEnable", false));
+    searchZonePmGroup.add(sZwidth.set("width", 100, 2, kinect.width));
+    searchZonePmGroup.add(sZheight.set("height", 100, 2, kinect.height));
+    searchZonePmGroup.add(szCenter.set("center", ofPoint(kinect.width*0.5, kinect.height*0.5), ofPoint(0), ofPoint(kinect.width, kinect.height)));
+    gui.add(searchZonePmGroup);
     gui.setPosition(820, 10);
     gui.saveToFile("patchCloudParameters");
 }
@@ -50,6 +57,8 @@ void ofApp::setupGui(){
 //--------------------------------------------------------------
 void ofApp::update() {
     kinect.update();
+
+    searchZone.setFromCenter(szCenter, sZwidth, sZheight);
     
     if(kinect.getHasNewFrame()){
             patchedImageCv = kinect.getPatchedCvImage(); // get the merged cvImage from the two kinects
@@ -103,38 +112,64 @@ void ofApp::oscSender(){
     ofPoint loc;
     ofRectangle area;
     int label;
+    static map<int, bool> toSend;
     ofPixelsRef patchedImagePixRef = patchedImageCv.getPixelsRef(); // getPathcedImage
     ofColor tempClr;
     string colorName;
+    bool bToSend;
     // new block = /newBlob <label> <color>
     for(int i=0; i< newLabels.size(); ++i){
-        ofxOscMessage m;
-        m.setAddress("/newBlob");
-        m.addIntArg(newLabels[i]);      // label
+        label = newLabels[i];
         area = ofxCv::toOf( contFinder.getBoundingRect(i) ); // get area of blob
-        tempClr = avgColor(area);                         // avg color of blob area
-        cout << (colorName = clrNamer.nameColorGroup(tempClr) ) <<endl;
-        if(colorName.length() == 0){
-            colorName = lastFoundColorGroup;
+        if(bSearchZoneOn){
+            if (searchZone.inside(area)) {
+                bToSend = true;
+            } else {
+                bToSend = false;
+            }
+            toSend.insert(pair<int, bool>(label, bToSend));
+
+        } else {
+            bToSend = true;
         }
-        m.addStringArg( colorName );     // send dat color name
-        sender.sendMessage(m);
-        lastFoundColorGroup = colorName;
+        
+        if(bToSend){
+            ofxOscMessage m;
+            m.setAddress("/newBlob");
+            m.addIntArg( label );      // label
+            tempClr = avgColor(area);                         // avg color of blob area
+            cout << (colorName = clrNamer.nameColorGroup(tempClr) ) <<endl;
+            if(colorName.length() == 0){
+                colorName = lastFoundColorGroup;
+            }
+            m.addStringArg( colorName );     // send dat color name
+            sender.sendMessage(m);
+            lastFoundColorGroup = colorName;
+        }
     }
     
     // block update = /currentBlob <label> <area> <age> <x> <y> <z>
     for(int i=0; i<contFinder.size(); ++i){
-        ofxOscMessage m;
-        m.setAddress("/currentBlob");
-        m.addIntArg((label = contFinder.getLabel(i)) );        // label
-        area = ofxCv::toOf( contFinder.getBoundingRect(i));
-        m.addIntArg((area.width*area.height ));                // area
-        m.addIntArg(tracker.getAge(label) );                   // age
-        loc = ofxCv::toOf(contFinder.getCenter(i));
-        m.addIntArg(loc.x);                                    // x
-        m.addIntArg(loc.y);                                    // y
-        m.addIntArg( patchedImagePixRef.getColor(loc.x, loc.y).getBrightness()); // z
-        sender.sendMessage(m);
+        label = contFinder.getLabel(i);
+        if(bSearchZoneOn){
+            bToSend = toSend.find( label )->second;
+        } else {
+            bToSend = true;
+        }
+        
+        if(bToSend){
+            ofxOscMessage m;
+            m.setAddress("/currentBlob");
+            m.addIntArg( label );        // label
+            area = ofxCv::toOf( contFinder.getBoundingRect(i));
+            m.addIntArg((area.width*area.height ));                // area
+            m.addIntArg(tracker.getAge(label) );                   // age
+            loc = ofxCv::toOf(contFinder.getCenter(i));
+            m.addIntArg(loc.x);                                    // x
+            m.addIntArg(loc.y);                                    // y
+            m.addIntArg( patchedImagePixRef.getColor(loc.x, loc.y).getBrightness()); // z
+            sender.sendMessage(m);
+        }
     }
     
     // block dead = /deadBlob <label>
@@ -142,6 +177,7 @@ void ofApp::oscSender(){
         ofxOscMessage m;
         m.setAddress("/deadBlob");
         m.addIntArg((label = deadLabels[i] ));        // label
+        toSend.erase( label ); // remove label from toSend map
         sender.sendMessage(m);
     }
 #ifdef SHOW_SENDER_DEBUG
@@ -183,7 +219,7 @@ ofColor ofApp::avgColor(ofRectangle area){
                            b/(float)numberOfColoredPixels);
     } else {
 //        avgColor = ofColor(r, g, b);
-        avgColor.blue;
+//        avgColor.blue;
     }
     
     return avgColor;
@@ -202,6 +238,14 @@ void ofApp::drawContFinder(){
             patchedImageCv.draw(0, 0);
         }
         contFinder.draw();
+        
+        if(bSearchZoneOn){
+            ofSetColor(ofColor().red);
+            ofNoFill();
+            ofRect(searchZone);
+            ofSetColor(255);
+        }
+        
         for(int i = 0; i < contFinder.size(); ++i) {
             ofPoint center = ofxCv::toOf(contFinder.getCenter(i));
             ofPushMatrix();

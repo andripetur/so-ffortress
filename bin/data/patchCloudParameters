@@ -34,4 +34,10 @@
 <cvFarClip>255</cvFarClip>
 <host>169.254.97.135</host>
 <FrameSmoothing>0</FrameSmoothing>
+<SearchZonePms>
+		<SearchZoneEnable>0</SearchZoneEnable>
+		<width>100</width>
+		<height>100</height>
+		<center>320, 240, 0</center>
+	</SearchZonePms>
 </group>

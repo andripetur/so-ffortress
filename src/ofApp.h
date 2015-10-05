@@ -46,6 +46,12 @@ public:
     ofxCvGrayscaleImage 	grayDiff;
     ofxCvGrayscaleImage     bgImage;
     
+    ofRectangle searchZone;
+    ofParameterGroup searchZonePmGroup;
+    ofParameter<bool> bSearchZoneOn;
+    ofParameter<float> sZwidth, sZheight;
+    ofParameter<ofPoint> szCenter;
+    
     bool bLearnBackground;
     bool bBackgroundLearned;
     bool bForgetBackground;	
