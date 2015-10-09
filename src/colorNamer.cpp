@@ -60,17 +60,6 @@ int colorNamer::findRowOfNearestColor(ofColor nameMe){
     float currDistance = 0;
     ofColor lab;
     
-//     distance in rgb color space
-//        for(int i=0;i<numRows;++i){
-//            currDistance =pow(((nameMe.r-row[i].rgb[0])*0.30),2)
-//                        + pow(((nameMe.g-row[i].rgb[1])*0.59),2)
-//                        + pow(((nameMe.b-row[i].rgb[2])*0.11),2);
-//            if(currDistance < smallestDistance){
-//                smallestDistance = currDistance;
-//                smallestDistanceRow = i;
-//            }
-//        }
-    
     // distance in Lab colorspace
     lab = ofxCv::convertColor(nameMe, CV_RGB2Lab);
     for(int i=0;i<numRows;++i){
@@ -154,12 +143,6 @@ string colorNamer::nameColorConditional(ofColor nameMe){
                     colorName = "yellow";
                 } else if( r > g ){
                     colorName = "red";
-                    //                    if(abs(b-g) < 65 && r>200){
-                    //                        colorName = "pink";
-                    //                        if(b < 65){
-                    //                            colorName = "orange";
-                    //                        }
-                    //                    }
                 } else {
                     if(g > b){
                         colorName = "green";

@@ -15,47 +15,51 @@
 
 class ofApp : public ofBaseApp {
 public:
-	
+    // ofStandardShiznit
 	void setup();
 	void update();
 	void draw();
 	void exit();
-		
 	void keyPressed(int key);
     
-    ofColor avgColor(ofRectangle area);
-    string lastFoundColorGroup;
-
-    void setupGui();
-    void oscSender();
-    void drawContFinder();
-    
+    // kinectMerger
     pointCloudStitcher kinect;
     
-    // GUI Variables
+    // GUI Variables og medd’
+    void setupGui();
+
     ofxPanel gui;
+    ofParameterGroup mainAppPm;
     ofParameter<bool> bShowInfo;
     ofParameter<int> minArea;
     ofParameter<string> host; 
-    bool bShowLabels;
     
     //CompVisionShizNit
+    void drawContFinder();
+
     ofxCv::ContourFinder    contFinder;
     ofxCvGrayscaleImage     patchedImageCv;
     ofxCvGrayscaleImage     grayDiffOfImage;
     ofxCvGrayscaleImage 	grayDiff;
     ofxCvGrayscaleImage     bgImage;
     
+    bool bLearnBackground;
+    bool bBackgroundLearned;
+    bool bForgetBackground;
+    
+    // search zone
     ofRectangle searchZone;
     ofParameterGroup searchZonePmGroup;
     ofParameter<bool> bSearchZoneOn;
     ofParameter<float> sZwidth, sZheight;
-    ofParameter<ofPoint> szCenter;
+    ofParameter<ofVec2f> szCenter;
     
-    bool bLearnBackground;
-    bool bBackgroundLearned;
-    bool bForgetBackground;	
+    // colorFinding
+    ofColor avgColor(ofRectangle area);
+    string lastFoundColorGroup;
+    colorNamer clrNamer;
     
+    // oscSender
     ofxOscSender sender;
-    colorNamer clrNamer; 
+    void oscSender();
 };

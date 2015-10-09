@@ -15,6 +15,7 @@
 	<Point_Cloud_Far_Clipping>0</Point_Cloud_Far_Clipping>
 	<P.C._Far_Clip>0</P.C._Far_Clip>
 	<FrameSmoothing>1</FrameSmoothing>
+	<ColorAdjustment>1</ColorAdjustment>
 	</PatchCloudParameters>
 <group/>
 <info>0</info>
@@ -38,6 +39,17 @@
 		<SearchZoneEnable>0</SearchZoneEnable>
 		<width>100</width>
 		<height>100</height>
-		<center>320, 240, 0</center>
+		<center>320, 240</center>
 	</SearchZonePms>
+<mainApp>
+		<info>0</info>
+		<cvMinArea>100</cvMinArea>
+		<host>169.254.97.135</host>
+	</mainApp>
+<viewpPointCloudParams>
+		<P.C._Far_Clip>0</P.C._Far_Clip>
+		<stepSize>4</stepSize>
+		<pointSize>4</pointSize>
+		<Mouse_Input>1</Mouse_Input>
+	</viewpPointCloudParams>
 </group>

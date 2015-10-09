@@ -50,21 +50,24 @@ private:
     int angle;
     bool hasNewFrame;
     ofxCvGrayscaleImage grayImage[amt]; // grayscale depth image
-    ofxCvGrayscaleImage patchedImageCv;
+    ofxCvGrayscaleImage patchedImageCv, pathcedImgCvSmooth;
     ofxCvColorImage colorImage[amt];
-    ofxCvColorImage patchedImageColor;
+    ofxCvColorImage patchedImageColor,patchedImageClrSmooth;
+    
+    ofPixels clrAdjust(ofxCvColorImage *img);
+    float sampleBrightness(ofPixels imgPix, int steps);
 
     // To view and adjust point cloud
     bool bDrawPointCloud;
     ofMesh mesh;
     ofEasyCam cam;
 
+    void setupParameters();
     ofParameter<float> mapFromLowZ, mapFromHighZ, mapToLowZ, mapToHighZ, transformConstant, pointSize;
     ofParameter<int> kinectDistance, kinectDistanceY, stepSize, pointCloudFarClipping;
-    ofParameter<bool> bEnableMouseInput, bShowInfo;
+    ofParameter<bool> bEnableMouseInput, bShowInfo, bUseClrAdjustment;
     
     void drawPointCloud();
-    void setupParameters();
     
     // frame smoothing
     unsigned int frameCount;
@@ -73,7 +76,6 @@ private:
     ofxCvGrayscaleImage frames[N_FRAMES+1];
     ofxCvColorImage clrFrames[N_FRAMES+1]; 
     void frameSmoother();
-    
     
     float** adjustPointClouds(ofxKinect* kPtrO,ofxKinect* kPtrT);
     void mergeGrayImages(ofxCvGrayscaleImage imgOne, ofxCvGrayscaleImage imgTwo, float **adj);

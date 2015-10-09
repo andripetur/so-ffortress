@@ -48,8 +48,9 @@ void pointCloudStitcher::setupParameters(){
     patchCloudParameters.add(kinectDistance.set("Kinect Distance", 0, 0, 1000));
     patchCloudParameters.add(kinectDistanceY.set("Kinect Distance Y", 0, -100, 100));
     patchCloudParameters.add(bUseFrameSmoothing.set("FrameSmoothing", true));
+    patchCloudParameters.add(bUseClrAdjustment.set("ColorAdjustment", true));
 
-    viewPointCloudParameters.setName("viewpPointCloudParams.");
+    viewPointCloudParameters.setName("viewpPointCloudParams");
     viewPointCloudParameters.add(pointCloudFarClipping.set("P.C. Far Clip", 0, 0, 10000));
     viewPointCloudParameters.add(stepSize.set("stepSize", 4, 1, 10));
     viewPointCloudParameters.add(pointSize.set("pointSize", 4, 1, 10));
@@ -76,7 +77,7 @@ void pointCloudStitcher::update(){
             colorImage[i].setFromPixels(kinect[i].getPixels(), kinect[i].width, kinect[i].height);
         }
         
-        float ** adj;
+        static float ** adj;
         adj = adjustPointClouds(&kinect[0], &kinect[1]);
         
         mergeGrayImages(grayImage[0], grayImage[1], adj);
@@ -93,10 +94,12 @@ void pointCloudStitcher::update(){
             if(bNewAccumedFrame){
                 frameSmoother();
                 patchedImageCv = frames[N_FRAMES];
+                patchedImageColor = clrFrames[N_FRAMES];
                 bNewAccumedFrame = false;
+                hasNewFrame = true;
             }
-            hasNewFrame = true;
         } else {
+            if(bUseClrAdjustment) clrAdjust(&patchedImageColor);
             hasNewFrame = true;
         }
     }
@@ -262,7 +265,8 @@ void pointCloudStitcher::mergeColorImages(ofxCvColorImage imgOne, ofxCvColorImag
 
 ofPixelsRef pointCloudStitcher::merge(ofPixelsRef imgOnePix, ofPixelsRef imgTwoPix, float **adj, int width, int height){
     ofPoint tempPointCurrent;
-
+    bool bIsColored = (imgOnePix.getNumChannels() > 1);
+    
     int offsetX, offsetY;
     int brightnessOne, brightness;
     for(int y = 0; y < height; ++y) {
@@ -273,9 +277,13 @@ ofPixelsRef pointCloudStitcher::merge(ofPixelsRef imgOnePix, ofPixelsRef imgTwoP
                 offsetY = y+kinectDistanceY;
                 if(offsetX < width && offsetX > 0) {
                     if(offsetY < height && offsetY > 0){
-                        if( imgOnePix.getColor(offsetX, offsetY).r > brightnessOne ){
-                            imgOnePix.setColor(offsetX, offsetY, imgTwoPix.getColor(x, y));
-                        }
+//                        if(bIsColored){
+//                            imgOnePix.setColor(offsetX, offsetY, imgTwoPix.getColor(x, y));
+//                        } else {
+                            if( imgOnePix.getColor(offsetX, offsetY).r > brightnessOne ){
+                                imgOnePix.setColor(offsetX, offsetY, imgTwoPix.getColor(x, y));
+                            }
+//                        }
                     }
                 }
                 
@@ -284,6 +292,44 @@ ofPixelsRef pointCloudStitcher::merge(ofPixelsRef imgOnePix, ofPixelsRef imgTwoP
     }
     
     return imgOnePix;
+}
+
+ofPixels pointCloudStitcher::clrAdjust(ofxCvColorImage *img){
+    static bool bFirstTime = true;
+    static ofPixels saturated, image;
+    if(bFirstTime){
+        saturated.allocate(width, height, 3);
+        image.allocate(width, height, 3);
+        bFirstTime = false;
+    }
+    image.setFromPixels(img->getPixels(), image.getWidth(), image.getHeight(), 3);
+    
+    ofColor currColor;
+    float brighter = (255 - sampleBrightness(image, 10)) * 0.75;
+    cout<<"brightness: " << brighter << endl;
+    for(int x=0; x<image.getWidth(); ++x){
+        for(int y=0; y<image.getHeight(); ++y){
+            currColor = image.getColor(x, y);
+            currColor.setBrightness( currColor.getBrightness() + brighter );
+            currColor.setSaturation( currColor.getSaturation()* + brighter);
+            saturated.setColor(x, y, currColor);
+        }
+    }
+    
+    return saturated;
+}
+
+float pointCloudStitcher::sampleBrightness(ofPixels imgPixs, int steps){
+    float brightness = 0;
+    int howManySamples = 0;
+    for(int x=0; x<imgPixs.getWidth(); x+=steps){
+        for(int y=0; y<imgPixs.getHeight(); y+=steps){
+            brightness += imgPixs.getColor(x, y).getBrightness();
+            ++howManySamples;
+        }
+    }
+    
+    return brightness/(float)howManySamples;
 }
 
 //--------------------------------------------------------------
@@ -314,6 +360,10 @@ void pointCloudStitcher::keyListener(ofKeyEventArgs & a){
             
         case'p':
             bDrawPointCloud = !bDrawPointCloud;
+            break;
+            
+        case'a':
+            bUseClrAdjustment = !bUseClrAdjustment;
             break;
             
         case 'o':
