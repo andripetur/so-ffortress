@@ -4,6 +4,7 @@
 void ofApp::setup() {
     kinect.setup();
     clrNamer.setup();
+    vidProjection.setup();
     
     // allocate space for compVis shiznit
     patchedImageCv.allocate(kinect.width, kinect.height);
@@ -44,6 +45,7 @@ void ofApp::setupGui(){
     // main pm
     mainAppPm.setName("mainApp");
     mainAppPm.add(bShowInfo.set("info", false));
+    mainAppPm.add(bDrawProjectionMapping.set("draw projection mapping", false));
     mainAppPm.add(minArea.set("cvMinArea", 100, 50, 300));
     mainAppPm.add(host.set("host", HOST));
     gui.add(mainAppPm);
@@ -57,6 +59,11 @@ void ofApp::setupGui(){
     searchZonePmGroup.add(szCenter.set("center", kinBoRi*0.5, ofPoint(0), kinBoRi ));
     gui.add(searchZonePmGroup);
     
+    // projectionMapping gui
+    gui.add( vidProjection.redBlockParameters );
+    vidProjection.videoParameters.add( bDrawContours.set("drawContours", false)); 
+    gui.add( vidProjection.videoParameters );
+
     // set position and save path
     gui.setPosition(820, 10);
     gui.saveToFile("patchCloudParameters");
@@ -107,6 +114,7 @@ void ofApp::update() {
         }//backGroundLearned
     }
     
+    vidProjection.update();
     oscSender();
 }
 
@@ -147,7 +155,7 @@ void ofApp::oscSender(){
             m.setAddress("/newBlob");
             m.addIntArg( label );      // label
             tempClr = avgColor(area);                         // avg color of blob area
-            cout << (colorName = clrNamer.nameColorGroup(tempClr) ) <<endl;
+//            cout << (colorName = clrNamer.nameColorGroup(tempClr) ) <<endl;
             if(colorName.length() == 0){
                 colorName = lastFoundColorGroup;
             }
@@ -191,8 +199,7 @@ void ofApp::oscSender(){
     }
 #ifdef SHOW_SENDER_DEBUG
     cout << "new labels:     " << newLabels.size() << endl;
-    cout << "current labels: " << contFinder.size() << endl;
-    cout << "dead labels:    " << deadLabels.size() << endl<<endl;
+    cout << "current labels: " << contFinder.size() << endl << endl;
 #endif
 }
 
@@ -278,36 +285,47 @@ void ofApp::drawContFinder(){
 //--------------------------------------------------------------
 void ofApp::draw() {
     
-	ofBackground(100, 100, 100);
 	ofSetColor(255, 255, 255);
 	
-    kinect.draw();
-	if(!kinect.isPointCloudDrawn()) {
-        
+    if(bDrawProjectionMapping){
+        ofBackground(0);
         ofPushMatrix();
-            ofTranslate(420, 10);
-            ofScale(0.625, 0.625);
-            drawContFinder();
+            vidProjection.draw(contFinder);
+            if(bDrawContours){
+                contFinder.draw();
+            }
         ofPopMatrix();
-    }
+    } else {
+        ofBackground(100, 100, 100);
 
-	// draw info
-    if(bShowInfo){
-        ofSetColor(255, 255, 255);
-        stringstream reportStream;
-    
-        reportStream
-        << " b to learn background."<< endl
-        << " f to forget background."<< endl
-        << " space to dis/enable mouse input for pointcloud"<< endl
-        << " num blobs found " << contFinder.size()
-        << " fps: " << ofGetFrameRate() << endl
-        << " c to close connection, o to open it again, connection is: " << kinect.isConnected() << endl;
-    
-        ofDrawBitmapString(reportStream.str(), 20, ofGetWindowHeight()*0.75);
+        kinect.draw();
+        if(!kinect.isPointCloudDrawn()) {
+            
+            ofPushMatrix();
+                ofTranslate(420, 10);
+                ofScale(0.625, 0.625);
+                drawContFinder();
+            ofPopMatrix();
+        }
+
+        // draw info
+        if(bShowInfo){
+            ofSetColor(255, 255, 255);
+            stringstream reportStream;
+        
+            reportStream
+            << " b to learn background."<< endl
+            << " f to forget background."<< endl
+            << " space to dis/enable mouse input for pointcloud"<< endl
+            << " num blobs found " << contFinder.size()
+            << " fps: " << ofGetFrameRate() << endl
+            << " c to close connection, o to open it again, connection is: " << kinect.isConnected() << endl;
+        
+            ofDrawBitmapString(reportStream.str(), 20, ofGetWindowHeight()*0.75);
+        }
     }
-    gui.draw();
     
+    gui.draw();
 }
 
 //--------------------------------------------------------------

@@ -18,8 +18,6 @@
 #include "greenblock.h"
 #include "yellowblock.h"
 
-
-
 #ifndef __Fortress_mapping__videoProjection__
 #define __Fortress_mapping__videoProjection__
 
@@ -30,15 +28,11 @@ public:
     void update();
     void draw(ofxCv::ContourFinder &contourFinder);
     void setupParameters();
-    
-private:
-    
-
-
     ofParameterGroup            videoParameters;
+    ofParameterGroup            redBlockParameters;
+
+private:
     ofParameter<float>          scale, moveX, moveY;
-    
-    ofParameterGroup            RedBlock;
     ofParameter<float>          brightness, speed;
     
     int                         W,H;
@@ -47,7 +41,6 @@ private:
     greenblock                  greenBlock;
     yellowblock                 yellowBlock;
     TexturedMesh                texturedMesh;
-    
 };
 
 

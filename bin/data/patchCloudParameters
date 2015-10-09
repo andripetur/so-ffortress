@@ -45,6 +45,7 @@
 		<info>0</info>
 		<cvMinArea>100</cvMinArea>
 		<host>169.254.97.135</host>
+	<draw_projection_mapping>0</draw_projection_mapping>
 	</mainApp>
 <viewpPointCloudParams>
 		<P.C._Far_Clip>0</P.C._Far_Clip>
@@ -52,4 +53,14 @@
 		<pointSize>4</pointSize>
 		<Mouse_Input>1</Mouse_Input>
 	</viewpPointCloudParams>
+<Red_Block>
+		<Brightness>70</Brightness>
+		<Speed>150</Speed>
+	</Red_Block>
+	<Video_Parameters>
+		<Scale>1</Scale>
+		<Move_X>0</Move_X>
+		<Move_Y>0</Move_Y>
+	<drawContours>0</drawContours>
+	</Video_Parameters>
 </group>

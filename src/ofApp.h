@@ -8,6 +8,7 @@
 #include "ofxGui.h"
 #include "pointCloudStitcher.h"
 #include "colorNamer.h"
+#include "videoProjection.h"
 
 //#define HOST "localhost"
 #define HOST "169.254.97.135"
@@ -30,7 +31,7 @@ public:
 
     ofxPanel gui;
     ofParameterGroup mainAppPm;
-    ofParameter<bool> bShowInfo;
+    ofParameter<bool> bShowInfo, bDrawProjectionMapping;
     ofParameter<int> minArea;
     ofParameter<string> host; 
     
@@ -46,6 +47,7 @@ public:
     bool bLearnBackground;
     bool bBackgroundLearned;
     bool bForgetBackground;
+    ofParameter<bool> bDrawContours;
     
     // search zone
     ofRectangle searchZone;
@@ -58,6 +60,9 @@ public:
     ofColor avgColor(ofRectangle area);
     string lastFoundColorGroup;
     colorNamer clrNamer;
+    
+    // video projection
+    videoProjection vidProjection; 
     
     // oscSender
     ofxOscSender sender;

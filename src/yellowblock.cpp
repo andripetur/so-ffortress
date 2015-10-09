@@ -41,9 +41,9 @@ void yellowblock::update(float speed, int counter)
 
 	float maxradius = sqrt(tussenstap);
 
+    float r;
 	for (int i = maxradius; i > 0; i-=15)
 	{
-		float r;
 		if(counter > next + i && counter < next + i + 20)
 		{
 			r = i + 10;
