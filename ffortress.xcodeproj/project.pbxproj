@@ -21,6 +21,14 @@
 		140798871BAB2BD900EDEF78 /* Tracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 140798781BAB2BD800EDEF78 /* Tracker.cpp */; };
 		140798881BAB2BD900EDEF78 /* Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 140798791BAB2BD800EDEF78 /* Utilities.cpp */; };
 		140798891BAB2BD900EDEF78 /* Wrappers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1407987A1BAB2BD800EDEF78 /* Wrappers.cpp */; };
+		14A3225C1BC7D69700BD482A /* blueblock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 14A3224C1BC7D69700BD482A /* blueblock.cpp */; };
+		14A3225D1BC7D69700BD482A /* greenblock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 14A3224E1BC7D69700BD482A /* greenblock.cpp */; };
+		14A3225E1BC7D69700BD482A /* mypoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 14A322501BC7D69700BD482A /* mypoint.cpp */; };
+		14A3225F1BC7D69700BD482A /* redblock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 14A322521BC7D69700BD482A /* redblock.cpp */; };
+		14A322601BC7D69700BD482A /* TexturedMesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 14A322541BC7D69700BD482A /* TexturedMesh.cpp */; };
+		14A322611BC7D69700BD482A /* treefractal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 14A322561BC7D69700BD482A /* treefractal.cpp */; };
+		14A322621BC7D69700BD482A /* videoProjection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 14A322581BC7D69700BD482A /* videoProjection.cpp */; };
+		14A322631BC7D69700BD482A /* yellowblock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 14A3225A1BC7D69700BD482A /* yellowblock.cpp */; };
 		14AAB7E91BB0880100B7E754 /* ofxCsv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 14AAB7E71BB0880100B7E754 /* ofxCsv.cpp */; };
 		14CCB4101BB098030092931F /* colorNamer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 14CCB40E1BB098030092931F /* colorNamer.cpp */; };
 		14DD89211BAAFA2D00BC1F70 /* pointCloudStitcher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 14DD891F1BAAFA2D00BC1F70 /* pointCloudStitcher.cpp */; };
@@ -160,6 +168,22 @@
 		140798791BAB2BD800EDEF78 /* Utilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utilities.cpp; sourceTree = "<group>"; };
 		1407987A1BAB2BD800EDEF78 /* Wrappers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Wrappers.cpp; sourceTree = "<group>"; };
 		1407987C1BAB2BD900EDEF78 /* ofxCv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxCv.h; sourceTree = "<group>"; };
+		14A3224C1BC7D69700BD482A /* blueblock.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = blueblock.cpp; sourceTree = "<group>"; };
+		14A3224D1BC7D69700BD482A /* blueblock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = blueblock.h; sourceTree = "<group>"; };
+		14A3224E1BC7D69700BD482A /* greenblock.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = greenblock.cpp; sourceTree = "<group>"; };
+		14A3224F1BC7D69700BD482A /* greenblock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = greenblock.h; sourceTree = "<group>"; };
+		14A322501BC7D69700BD482A /* mypoint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mypoint.cpp; sourceTree = "<group>"; };
+		14A322511BC7D69700BD482A /* mypoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mypoint.h; sourceTree = "<group>"; };
+		14A322521BC7D69700BD482A /* redblock.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = redblock.cpp; sourceTree = "<group>"; };
+		14A322531BC7D69700BD482A /* redblock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = redblock.h; sourceTree = "<group>"; };
+		14A322541BC7D69700BD482A /* TexturedMesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TexturedMesh.cpp; sourceTree = "<group>"; };
+		14A322551BC7D69700BD482A /* TexturedMesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TexturedMesh.h; sourceTree = "<group>"; };
+		14A322561BC7D69700BD482A /* treefractal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = treefractal.cpp; sourceTree = "<group>"; };
+		14A322571BC7D69700BD482A /* treefractal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = treefractal.h; sourceTree = "<group>"; };
+		14A322581BC7D69700BD482A /* videoProjection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = videoProjection.cpp; sourceTree = "<group>"; };
+		14A322591BC7D69700BD482A /* videoProjection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = videoProjection.h; sourceTree = "<group>"; };
+		14A3225A1BC7D69700BD482A /* yellowblock.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = yellowblock.cpp; sourceTree = "<group>"; };
+		14A3225B1BC7D69700BD482A /* yellowblock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = yellowblock.h; sourceTree = "<group>"; };
 		14AAB7E71BB0880100B7E754 /* ofxCsv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxCsv.cpp; sourceTree = "<group>"; };
 		14AAB7E81BB0880100B7E754 /* ofxCsv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxCsv.h; sourceTree = "<group>"; };
 		14CCB40E1BB098030092931F /* colorNamer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = colorNamer.cpp; sourceTree = "<group>"; };
@@ -544,6 +568,29 @@
 				1407987B1BAB2BD900EDEF78 /* src */,
 			);
 			name = ofxCv;
+			sourceTree = "<group>";
+		};
+		14A322641BC7D6A700BD482A /* Projection mapping */ = {
+			isa = PBXGroup;
+			children = (
+				14A3224C1BC7D69700BD482A /* blueblock.cpp */,
+				14A3224D1BC7D69700BD482A /* blueblock.h */,
+				14A3224E1BC7D69700BD482A /* greenblock.cpp */,
+				14A3224F1BC7D69700BD482A /* greenblock.h */,
+				14A322501BC7D69700BD482A /* mypoint.cpp */,
+				14A322511BC7D69700BD482A /* mypoint.h */,
+				14A322521BC7D69700BD482A /* redblock.cpp */,
+				14A322531BC7D69700BD482A /* redblock.h */,
+				14A322541BC7D69700BD482A /* TexturedMesh.cpp */,
+				14A322551BC7D69700BD482A /* TexturedMesh.h */,
+				14A322561BC7D69700BD482A /* treefractal.cpp */,
+				14A322571BC7D69700BD482A /* treefractal.h */,
+				14A322581BC7D69700BD482A /* videoProjection.cpp */,
+				14A322591BC7D69700BD482A /* videoProjection.h */,
+				14A3225A1BC7D69700BD482A /* yellowblock.cpp */,
+				14A3225B1BC7D69700BD482A /* yellowblock.h */,
+			);
+			name = "Projection mapping";
 			sourceTree = "<group>";
 		};
 		14AAB7E61BB0880100B7E754 /* ofxCsv */ = {
@@ -1082,6 +1129,7 @@
 				14CCB40F1BB098030092931F /* colorNamer.h */,
 				14DD891F1BAAFA2D00BC1F70 /* pointCloudStitcher.cpp */,
 				14DD89201BAAFA2D00BC1F70 /* pointCloudStitcher.h */,
+				14A322641BC7D6A700BD482A /* Projection mapping */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -1241,6 +1289,7 @@
 				3F01B8F01BA4782100A3B771 /* tinyxmlparser.cpp in Sources */,
 				7ADB04AF67C568EAFAEBA546 /* ofxKinectExtras.cpp in Sources */,
 				140798841BAB2BD900EDEF78 /* Kalman.cpp in Sources */,
+				14A322631BC7D69700BD482A /* yellowblock.cpp in Sources */,
 				3F01B8EF1BA4782100A3B771 /* tinyxmlerror.cpp in Sources */,
 				140798821BAB2BD900EDEF78 /* Flow.cpp in Sources */,
 				3F82B6581B98D40C00743C68 /* UdpSocketWin.cpp in Sources */,
@@ -1261,14 +1310,19 @@
 				F4135EEFC911E9ED211FB6F9 /* core.c in Sources */,
 				3F01B8D91BA46D4700A3B771 /* ofxBaseGui.cpp in Sources */,
 				3F82B6591B98D40C00743C68 /* OscOutboundPacketStream.cpp in Sources */,
+				14A3225D1BC7D69700BD482A /* greenblock.cpp in Sources */,
 				255A7B680DC81E543C875794 /* usb_libusb10.c in Sources */,
+				14A322611BC7D69700BD482A /* treefractal.cpp in Sources */,
 				3F01B8F11BA4782100A3B771 /* ofxXmlSettings.cpp in Sources */,
 				3F01B8DF1BA46D4700A3B771 /* ofxSliderGroup.cpp in Sources */,
 				ACE7DC9A3223ED5EE1B80074 /* cameras.c in Sources */,
+				14A322621BC7D69700BD482A /* videoProjection.cpp in Sources */,
 				140798831BAB2BD900EDEF78 /* Helpers.cpp in Sources */,
 				3F01B8DB1BA46D4700A3B771 /* ofxGuiGroup.cpp in Sources */,
 				140798871BAB2BD900EDEF78 /* Tracker.cpp in Sources */,
+				14A3225C1BC7D69700BD482A /* blueblock.cpp in Sources */,
 				49BEEB2DFA5319D55AA6899F /* tilt.c in Sources */,
+				14A3225E1BC7D69700BD482A /* mypoint.cpp in Sources */,
 				140798801BAB2BD900EDEF78 /* ContourFinder.cpp in Sources */,
 				0F8F016776681D468C0D0949 /* audio.c in Sources */,
 				3F01B8DC1BA46D4700A3B771 /* ofxLabel.cpp in Sources */,
@@ -1280,6 +1334,7 @@
 				1407987E1BAB2BD900EDEF78 /* fdog.cpp in Sources */,
 				140798881BAB2BD900EDEF78 /* Utilities.cpp in Sources */,
 				250A95BA26587BE85DB0A353 /* ofxCvColorImage.cpp in Sources */,
+				14A3225F1BC7D69700BD482A /* redblock.cpp in Sources */,
 				3F82B6541B98D40C00743C68 /* IpEndpointName.cpp in Sources */,
 				3F01B8E01BA46D4700A3B771 /* ofxToggle.cpp in Sources */,
 				FB09C6B2A1DA0EA217240CB8 /* ofxCvGrayscaleImage.cpp in Sources */,
@@ -1296,6 +1351,7 @@
 				3F82B65C1B98D40C00743C68 /* OscTypes.cpp in Sources */,
 				3F82B6571B98D40C00743C68 /* NetworkingUtilsWin.cpp in Sources */,
 				E212C821D1064B92DD953A42 /* ofxCvHaarFinder.cpp in Sources */,
+				14A322601BC7D69700BD482A /* TexturedMesh.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
