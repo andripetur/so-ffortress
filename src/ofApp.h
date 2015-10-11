@@ -4,11 +4,11 @@
 #include "ofxOpenCv.h"
 #include "ofxCv.h"
 #include "ofxOsc.h"
-#include "string.h"
 #include "ofxGui.h"
 #include "pointCloudStitcher.h"
 #include "colorNamer.h"
 #include "videoProjection.h"
+#include "WindowManager.h"
 
 //#define HOST "localhost"
 #define HOST "169.254.97.135"
@@ -23,6 +23,9 @@ public:
 	void exit();
 	void keyPressed(int key);
     
+    // window manager for second window
+    WindowManager winManager;
+    
     // kinectMerger
     pointCloudStitcher kinect;
     
@@ -31,9 +34,9 @@ public:
 
     ofxPanel gui;
     ofParameterGroup mainAppPm;
-    ofParameter<bool> bShowInfo, bDrawProjectionMapping;
+    ofParameter<bool> bShowInfo, bDrawProjectionMapping, bShowLabelColors;
     ofParameter<int> minArea;
-    ofParameter<string> host; 
+    ofParameter<string> host;
     
     //CompVisionShizNit
     void drawContFinder();
@@ -47,8 +50,7 @@ public:
     bool bLearnBackground;
     bool bBackgroundLearned;
     bool bForgetBackground;
-    ofParameter<bool> bDrawContours;
-    
+
     // search zone
     ofRectangle searchZone;
     ofParameterGroup searchZonePmGroup;

@@ -20,7 +20,7 @@ public:
     void setup();
     void update();
     void draw(int x, int y, int width, int height, ofTexture &texture, ofPolyline &polyline, int label);
-
+    void draw(ofRectangle drawArea, ofTexture &texture, ofPolyline &polyLine, int label);
     
 private:
     ofMesh mesh;

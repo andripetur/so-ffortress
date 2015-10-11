@@ -27,13 +27,22 @@ public:
     void setup();
     void update();
     void draw(ofxCv::ContourFinder &contourFinder);
+    void drawLabelColorMap(); 
     void setupParameters();
     ofParameterGroup            videoParameters;
     ofParameterGroup            redBlockParameters;
-
+    
+    enum BLOCK_TYPE{ RED_BLOCK, BLUE_BLOCK, YELLOW_BLOCK, WHITE_BLOCK, BLACK_BLOCK };
+    // map label, blockType
+    map<int, int> blockMap;
+    
+    int clrStngToBlkT(string clr);
+    string BlkTyToStngColor(int blT);
+    
 private:
     ofParameter<float>          scale, moveX, moveY;
     ofParameter<float>          brightness, speed;
+    ofParameter<bool>           bDrawContours;
     
     int                         W,H;
     redblock                    redBlock;

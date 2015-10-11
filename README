@@ -7,3 +7,5 @@ Dependencies:
 of_0.8.4
 ofxCv
 ofxCsv
+ofxAppGLFWWindowMulti 
+	(acarabott fork: https://github.com/acarabott/ofxAppGLFWWindowMulti )

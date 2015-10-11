@@ -27,15 +27,13 @@ void redblock::update(float x, float y, int brightness, float speed)
     ofSetColor(255, 255, 255);
     //ofRect(x, y, drawwidth, drawheight);
 
-    float a;
-    float b;
-    float c;
+    float a,b,c;
     float noise;
     float color;
     ofColor kleurtje;
     
-    for (int tempy=0; tempy<drawHeight; tempy++) {
-        for (int tempx=0; tempx<drawWidth; tempx++) {
+    for (int tempy=0; tempy<drawHeight; ++tempy) {
+        for (int tempx=0; tempx<drawWidth; ++tempx) {
 
             a = tempx * .01;
             b = tempy * .01;
@@ -59,6 +57,5 @@ void redblock::update(float x, float y, int brightness, float speed)
 
 ofImage redblock::getimage()
 {
-
 	return img;
 }

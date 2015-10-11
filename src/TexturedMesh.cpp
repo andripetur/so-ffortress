@@ -31,13 +31,17 @@ void TexturedMesh::update(){
     mesh.clear();
 }
 
+void TexturedMesh::draw(ofRectangle drawArea, ofTexture &texture, ofPolyline &polyLine, int label){
+    draw(drawArea.x, drawArea.y, drawArea.width, drawArea.height, texture, polyLine, label);
+}
+
 void TexturedMesh::draw(int x, int y, int width, int height, ofTexture &texture,ofPolyline &polyline, int label){
 
 
     ofPath pathFromContour;
     
     //CREATE PATHS FROM POLYLINES
-    for(int j = 0; j < polyline.getVertices().size(); j++) {
+    for(int j = 0; j < polyline.getVertices().size(); ++j) {
         if(j == 0) {
             pathFromContour.newSubPath();
             pathFromContour.moveTo(polyline.getVertices()[j]);

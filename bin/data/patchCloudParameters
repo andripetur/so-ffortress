@@ -6,54 +6,30 @@
 		<mapToHighZ>0</mapToHighZ>
 		<transformConstant>1</transformConstant>
 		<Kinect_Distance>0</Kinect_Distance>
-	<stepSize>4</stepSize>
-		<pointSize>4</pointSize>
-	<Mouse_Input>1</Mouse_Input>
-	<info>0</info>
-	<Kinect_Distance_Y>0</Kinect_Distance_Y>
-	<Kinect_Far_Clipping>0</Kinect_Far_Clipping>
-	<Point_Cloud_Far_Clipping>0</Point_Cloud_Far_Clipping>
-	<P.C._Far_Clip>0</P.C._Far_Clip>
-	<FrameSmoothing>1</FrameSmoothing>
-	<ColorAdjustment>1</ColorAdjustment>
+		<Kinect_Distance_Y>0</Kinect_Distance_Y>
+		<FrameSmoothing>1</FrameSmoothing>
+		<ColorAdjustment>1</ColorAdjustment>
 	</PatchCloudParameters>
-<group/>
-<info>0</info>
-<cvMinArea>100</cvMinArea>
-<adjustPointCloudParamters>
-		<P.C._Far_Clip>0</P.C._Far_Clip>
-		<stepSize>4</stepSize>
-		<pointSize>4</pointSize>
-		<Mouse_Input>1</Mouse_Input>
-	</adjustPointCloudParamters>
-<viewpPointCloudParams.>
-		<P.C._Far_Clip>0</P.C._Far_Clip>
-		<stepSize>4</stepSize>
-		<pointSize>4</pointSize>
-		<Mouse_Input>1</Mouse_Input>
-	</viewpPointCloudParams.>
-<cvFarClip>255</cvFarClip>
-<host>169.254.97.135</host>
-<FrameSmoothing>0</FrameSmoothing>
-<SearchZonePms>
-		<SearchZoneEnable>0</SearchZoneEnable>
-		<width>100</width>
-		<height>100</height>
-		<center>320, 240</center>
-	</SearchZonePms>
-<mainApp>
-		<info>0</info>
-		<cvMinArea>100</cvMinArea>
-		<host>169.254.97.135</host>
-	<draw_projection_mapping>0</draw_projection_mapping>
-	</mainApp>
-<viewpPointCloudParams>
+	<viewpPointCloudParams>
 		<P.C._Far_Clip>0</P.C._Far_Clip>
 		<stepSize>4</stepSize>
 		<pointSize>4</pointSize>
 		<Mouse_Input>1</Mouse_Input>
 	</viewpPointCloudParams>
-<Red_Block>
+	<mainApp>
+		<info>0</info>
+		<show_Label&Colors>0</show_Label&Colors>
+		<draw_projection_mapping>0</draw_projection_mapping>
+		<cvMinArea>100</cvMinArea>
+		<host>169.254.97.135</host>
+	</mainApp>
+	<SearchZonePms>
+		<SearchZoneEnable>0</SearchZoneEnable>
+		<width>100</width>
+		<height>100</height>
+		<center>320, 240</center>
+	</SearchZonePms>
+	<Red_Block>
 		<Brightness>70</Brightness>
 		<Speed>150</Speed>
 	</Red_Block>
@@ -61,6 +37,6 @@
 		<Scale>1</Scale>
 		<Move_X>0</Move_X>
 		<Move_Y>0</Move_Y>
-	<drawContours>0</drawContours>
+		<drawContours>0</drawContours>
 	</Video_Parameters>
 </group>

@@ -32,6 +32,9 @@
 		14AAB7E91BB0880100B7E754 /* ofxCsv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 14AAB7E71BB0880100B7E754 /* ofxCsv.cpp */; };
 		14CCB4101BB098030092931F /* colorNamer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 14CCB40E1BB098030092931F /* colorNamer.cpp */; };
 		14DD89211BAAFA2D00BC1F70 /* pointCloudStitcher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 14DD891F1BAAFA2D00BC1F70 /* pointCloudStitcher.cpp */; };
+		14F4A2211BCAB4A7003F5F4E /* ofxAppGLFWWindowMulti.mm in Sources */ = {isa = PBXBuildFile; fileRef = 14F4A21B1BCAB4A7003F5F4E /* ofxAppGLFWWindowMulti.mm */; };
+		14F4A2221BCAB4A7003F5F4E /* WindowManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 14F4A21C1BCAB4A7003F5F4E /* WindowManager.cpp */; };
+		14F4A2271BCAB4DE003F5F4E /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14F4A2261BCAB4DE003F5F4E /* Carbon.framework */; };
 		169D3C72FDE6C5590A1616F5 /* ofxCvFloatImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7B6A03390302D5A2C9F0E4AB /* ofxCvFloatImage.cpp */; };
 		1D5F3298C2FA073628012944 /* ofxCvContourFinder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C76DE5C29BDBD2CAA1DD0021 /* ofxCvContourFinder.cpp */; };
 		21A059755481CC0BF969FD2D /* keep_alive.c in Sources */ = {isa = PBXBuildFile; fileRef = A3528DDFF05B00283552455D /* keep_alive.c */; };
@@ -191,6 +194,11 @@
 		14D52FFD1BBD358A0049641E /* ral_colors.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = ral_colors.csv; path = bin/data/ral_colors.csv; sourceTree = "<group>"; };
 		14DD891F1BAAFA2D00BC1F70 /* pointCloudStitcher.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pointCloudStitcher.cpp; sourceTree = "<group>"; };
 		14DD89201BAAFA2D00BC1F70 /* pointCloudStitcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pointCloudStitcher.h; sourceTree = "<group>"; };
+		14F4A21A1BCAB4A7003F5F4E /* ofxAppGLFWWindowMulti.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxAppGLFWWindowMulti.h; sourceTree = "<group>"; };
+		14F4A21B1BCAB4A7003F5F4E /* ofxAppGLFWWindowMulti.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ofxAppGLFWWindowMulti.mm; sourceTree = "<group>"; };
+		14F4A21C1BCAB4A7003F5F4E /* WindowManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WindowManager.cpp; sourceTree = "<group>"; };
+		14F4A21D1BCAB4A7003F5F4E /* WindowManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WindowManager.h; sourceTree = "<group>"; };
+		14F4A2261BCAB4DE003F5F4E /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		1E95EFD35ED9C5D97F2F015E /* timer.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = timer.h; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/timer.h; sourceTree = SOURCE_ROOT; };
 		241AAF7769D555E4ECD57E17 /* cameras.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = cameras.h; path = ../../../addons/ofxKinect/libs/libfreenect/src/cameras.h; sourceTree = SOURCE_ROOT; };
 		28F9707464BA3FF98E05096C /* usb_libusb10.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 30; name = usb_libusb10.c; path = ../../../addons/ofxKinect/libs/libfreenect/src/usb_libusb10.c; sourceTree = SOURCE_ROOT; };
@@ -391,6 +399,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				14F4A2271BCAB4DE003F5F4E /* Carbon.framework in Frameworks */,
 				E7F985F815E0DEA3003869B5 /* Accelerate.framework in Frameworks */,
 				E7E077E815D3B6510020DFD4 /* QTKit.framework in Frameworks */,
 				E4EB6799138ADC1D00A09F29 /* GLUT.framework in Frameworks */,
@@ -601,6 +610,26 @@
 			);
 			name = ofxCsv;
 			path = ../../../addons/ofxCsv/src;
+			sourceTree = "<group>";
+		};
+		14F4A2051BCAB4A7003F5F4E /* ofxAppGLFWWindowMulti */ = {
+			isa = PBXGroup;
+			children = (
+				14F4A2191BCAB4A7003F5F4E /* src */,
+			);
+			name = ofxAppGLFWWindowMulti;
+			path = ../../../addons/ofxAppGLFWWindowMulti;
+			sourceTree = "<group>";
+		};
+		14F4A2191BCAB4A7003F5F4E /* src */ = {
+			isa = PBXGroup;
+			children = (
+				14F4A21A1BCAB4A7003F5F4E /* ofxAppGLFWWindowMulti.h */,
+				14F4A21B1BCAB4A7003F5F4E /* ofxAppGLFWWindowMulti.mm */,
+				14F4A21C1BCAB4A7003F5F4E /* WindowManager.cpp */,
+				14F4A21D1BCAB4A7003F5F4E /* WindowManager.h */,
+			);
+			path = src;
 			sourceTree = "<group>";
 		};
 		170C3384C93B182490DDC9CC /* contrib */ = {
@@ -998,6 +1027,7 @@
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
+				14F4A2051BCAB4A7003F5F4E /* ofxAppGLFWWindowMulti */,
 				14AAB7E61BB0880100B7E754 /* ofxCsv */,
 				1407988A1BAB2BE100EDEF78 /* ofxCv */,
 				3F01B8E51BA4782100A3B771 /* ofxXmlSettings */,
@@ -1108,6 +1138,7 @@
 		E4B69B4A0A3A1720003C02F2 = {
 			isa = PBXGroup;
 			children = (
+				14F4A2261BCAB4DE003F5F4E /* Carbon.framework */,
 				E4B6FCAD0C3E899E008CF71C /* openFrameworks-Info.plist */,
 				E4EB6923138AFD0F00A09F29 /* Project.xcconfig */,
 				E4B69E1C0A3A1BDC003C02F2 /* src */,
@@ -1313,6 +1344,7 @@
 				14A3225D1BC7D69700BD482A /* greenblock.cpp in Sources */,
 				255A7B680DC81E543C875794 /* usb_libusb10.c in Sources */,
 				14A322611BC7D69700BD482A /* treefractal.cpp in Sources */,
+				14F4A2221BCAB4A7003F5F4E /* WindowManager.cpp in Sources */,
 				3F01B8F11BA4782100A3B771 /* ofxXmlSettings.cpp in Sources */,
 				3F01B8DF1BA46D4700A3B771 /* ofxSliderGroup.cpp in Sources */,
 				ACE7DC9A3223ED5EE1B80074 /* cameras.c in Sources */,
@@ -1329,6 +1361,7 @@
 				3F01B8DE1BA46D4700A3B771 /* ofxSlider.cpp in Sources */,
 				63020F16C7E8DED980111241 /* ofxCvImage.cpp in Sources */,
 				169D3C72FDE6C5590A1616F5 /* ofxCvFloatImage.cpp in Sources */,
+				14F4A2211BCAB4A7003F5F4E /* ofxAppGLFWWindowMulti.mm in Sources */,
 				14AAB7E91BB0880100B7E754 /* ofxCsv.cpp in Sources */,
 				3F82B6601B98D40C00743C68 /* ofxOscReceiver.cpp in Sources */,
 				1407987E1BAB2BD900EDEF78 /* fdog.cpp in Sources */,
@@ -1437,7 +1470,7 @@
 					"../../../addons/ofxKinect/libs/libusb-1.0/lib/osx/usb-1.0.a",
 					../../../addons/ofxOpenCv/libs/opencv/lib/osx/opencv.a,
 				);
-				SDKROOT = macosx;
+				SDKROOT = macosx10.10;
 			};
 			name = Debug;
 		};
@@ -1513,7 +1546,7 @@
 					"../../../addons/ofxKinect/libs/libusb-1.0/lib/osx/usb-1.0.a",
 					../../../addons/ofxOpenCv/libs/opencv/lib/osx/opencv.a,
 				);
-				SDKROOT = macosx;
+				SDKROOT = macosx10.10;
 			};
 			name = Release;
 		};
@@ -1640,6 +1673,7 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_51)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_52)",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = ffortressDebug;
 				WRAPPER_EXTENSION = app;
 			};
@@ -1767,6 +1801,7 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_50)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_51)",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = ffortress;
 				WRAPPER_EXTENSION = app;
 			};

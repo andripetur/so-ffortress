@@ -28,9 +28,9 @@ void blueblock::update(float x, float y, int randomness, int length, float speed
 	if(counter >= nextflash && counter < (nextflash + nextflashlength)){		
 		//blueimage.clear();
 
-		for (int tx = 0; tx < drawWidth; tx++)
+		for (int tx = 0; tx < drawWidth; ++tx)
 		{
-			for (int ty = 0; ty < drawHeight; ty++)
+			for (int ty = 0; ty < drawHeight; ++ty)
 			{
 				img.setColor(tx, ty, ofColor(ofRandom(255), ofRandom(255),ofRandom(255)));
 			}
@@ -69,7 +69,4 @@ void blueblock::update(float x, float y, int randomness, int length, float speed
 ofImage blueblock::getimage()
 {
 	return img;
-
-
-
 }

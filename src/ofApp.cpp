@@ -2,6 +2,16 @@
 
 //--------------------------------------------------------------
 void ofApp::setup() {
+    // setup both windows
+    winManager.setup((ofxAppGLFWWindowMulti *)ofGetWindowPtr());
+    
+    ofSetWindowTitle("Beam/Draw");
+    
+    winManager.createWindow();
+    winManager.setWindowTitle(1, "GUI");
+    winManager.setWindowShape(1, 300, ofGetScreenHeight());
+    winManager.setWindowPosition(1, 0, 0);
+    
     kinect.setup();
     clrNamer.setup();
     vidProjection.setup();
@@ -45,6 +55,7 @@ void ofApp::setupGui(){
     // main pm
     mainAppPm.setName("mainApp");
     mainAppPm.add(bShowInfo.set("info", false));
+    mainAppPm.add(bShowLabelColors.set("show Label&Colors", false));
     mainAppPm.add(bDrawProjectionMapping.set("draw projection mapping", false));
     mainAppPm.add(minArea.set("cvMinArea", 100, 50, 300));
     mainAppPm.add(host.set("host", HOST));
@@ -61,11 +72,10 @@ void ofApp::setupGui(){
     
     // projectionMapping gui
     gui.add( vidProjection.redBlockParameters );
-    vidProjection.videoParameters.add( bDrawContours.set("drawContours", false)); 
     gui.add( vidProjection.videoParameters );
 
     // set position and save path
-    gui.setPosition(820, 10);
+    gui.setPosition(10, 10);
     gui.saveToFile("patchCloudParameters");
 }
 
@@ -139,13 +149,9 @@ void ofApp::oscSender(){
         label = newLabels[i];
         area = ofxCv::toOf( contFinder.getBoundingRect(i) ); // get area of blob
         if(bSearchZoneOn){
-            if (searchZone.inside(area)) {
-                bToSend = true;
-            } else {
-                bToSend = false;
-            }
+            // send if inside search zone
+            bToSend = searchZone.inside(area);
             toSend.insert(pair<int, bool>(label, bToSend));
-
         } else {
             bToSend = true;
         }
@@ -160,6 +166,7 @@ void ofApp::oscSender(){
                 colorName = lastFoundColorGroup;
             }
             m.addStringArg( colorName );     // send dat color name
+            vidProjection.blockMap.insert(pair<int, int>(label, vidProjection.clrStngToBlkT( colorName ) ));
             sender.sendMessage(m);
             lastFoundColorGroup = colorName;
         }
@@ -195,6 +202,7 @@ void ofApp::oscSender(){
         m.setAddress("/deadBlob");
         m.addIntArg((label = deadLabels[i] ));        // label
         toSend.erase( label ); // remove label from toSend map
+        vidProjection.blockMap.erase( label ); // remove label from color map
         sender.sendMessage(m);
     }
 #ifdef SHOW_SENDER_DEBUG
@@ -246,8 +254,6 @@ ofColor ofApp::avgColor(ofRectangle area){
 void ofApp::drawContFinder(){
     ofxCv::RectTracker& tracker = contFinder.getTracker();
     
-    ofSetColor(255);
-    
     // draw merged depth image.
     if(bBackgroundLearned){
         // draw bg extraction 
@@ -265,7 +271,6 @@ void ofApp::drawContFinder(){
         ofSetColor(ofColor().red);
         ofNoFill();
         ofRect(searchZone);
-        ofSetColor(255);
     }
     
     // draw label and age.
@@ -284,35 +289,33 @@ void ofApp::drawContFinder(){
 
 //--------------------------------------------------------------
 void ofApp::draw() {
+    int activeWindow = winManager.getActiveWindowNo();
     
-	ofSetColor(255, 255, 255);
-	
-    if(bDrawProjectionMapping){
-        ofBackground(0);
-        ofPushMatrix();
-            vidProjection.draw(contFinder);
-            if(bDrawContours){
-                contFinder.draw();
+    ofSetColor(255, 255, 255);
+    if( activeWindow == 0){ // if in main window draw to be beamed stuff:
+        if(bDrawProjectionMapping){
+            vidProjection.draw(contFinder); // beam on blocks
+        } else {
+            ofBackground(100, 100, 100);
+
+            kinect.draw();
+            if(!kinect.isPointCloudDrawn()) {
+                ofPushMatrix();
+                    ofTranslate(420, 10);
+                    ofScale(0.625, 0.625);
+                    drawContFinder();
+                ofPopMatrix();
             }
-        ofPopMatrix();
-    } else {
-        ofBackground(100, 100, 100);
-
-        kinect.draw();
-        if(!kinect.isPointCloudDrawn()) {
-            
-            ofPushMatrix();
-                ofTranslate(420, 10);
-                ofScale(0.625, 0.625);
-                drawContFinder();
-            ofPopMatrix();
         }
-
+    }else{ // if gui window draw gui elements
+        ofBackground(60, 60, 60);
+        gui.draw();
+        
         // draw info
         if(bShowInfo){
             ofSetColor(255, 255, 255);
             stringstream reportStream;
-        
+            
             reportStream
             << " b to learn background."<< endl
             << " f to forget background."<< endl
@@ -320,17 +323,20 @@ void ofApp::draw() {
             << " num blobs found " << contFinder.size()
             << " fps: " << ofGetFrameRate() << endl
             << " c to close connection, o to open it again, connection is: " << kinect.isConnected() << endl;
-        
+            
             ofDrawBitmapString(reportStream.str(), 20, ofGetWindowHeight()*0.75);
+        }
+        
+        if(bShowLabelColors){
+            ofSetColor(255);
+            vidProjection.drawLabelColorMap();
         }
     }
     
-    gui.draw();
 }
 
 //--------------------------------------------------------------
 void ofApp::exit() {
-
 }
 
 //--------------------------------------------------------------
@@ -347,6 +353,11 @@ void ofApp::keyPressed (int key) {
         case'i':
         case'I':
             bShowInfo = !bShowInfo;
+            break;
+            
+        case'l':
+            case'L':
+            bShowLabelColors = !bShowLabelColors;
             break;
 	}
 }
