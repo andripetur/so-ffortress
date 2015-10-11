@@ -30,7 +30,8 @@ void videoProjection::update(){
     texturedMesh.update();
 }
 
-void videoProjection::draw(ofxCv::ContourFinder &contourFinder){
+void videoProjection::draw(ofxCv::ContourFinder*
+                           contourFinder){
     
     ofPushMatrix();
     ofBackground(0);
@@ -40,16 +41,16 @@ void videoProjection::draw(ofxCv::ContourFinder &contourFinder){
     int label;
     ofPolyline smoothPolyLine;
     ofTexture blockTexture; 
-    for(int i = 0; i < contourFinder.size(); i++) {
+    for(int i = 0; i < contourFinder->size(); i++) {
         //fxCv::RectTracker& tracker = contourFinder.getTracker();
         // get contour, label, center point, and age of contour
         //vector<cv::Point> points = contourFinder.getContour(i);
         //ofPoint center = ofxCv::toOf(contourFinder.getCenter(i));
         
-        label = contourFinder.getLabel(i);
+        label = contourFinder->getLabel(i);
 
         //contour smoothing
-        smoothPolyLine = contourFinder.getPolyline(i).getSmoothed(10, 0.0);
+        smoothPolyLine = contourFinder->getPolyline(i).getSmoothed(10, 0.0);
         
         // get the right texture
         switch ( blockMap.find(label)->second ) {
@@ -67,13 +68,13 @@ void videoProjection::draw(ofxCv::ContourFinder &contourFinder){
         }
         
         // resize and draw textures on bounding box
-        texturedMesh.draw(  ofxCv::toOf( contourFinder.getBoundingRect(i) ),
+        texturedMesh.draw(  ofxCv::toOf( contourFinder->getBoundingRect(i) ),
                             blockTexture,
                             smoothPolyLine,
                             label);
     }
     
-    if(bDrawContours) contourFinder.draw(); // draw contours for alignment
+    if(bDrawContours) contourFinder->draw(); // draw contours for alignment
     ofPopMatrix();
     
 }

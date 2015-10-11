@@ -10,7 +10,7 @@
 
 void pointCloudStitcher::setup(){
     // zero the tilt on startup
-    angle = -30;
+    angle = 0;
     hasNewFrame = false; 
     for(int i=0; i<amt; ++i){
         kinect[i].setRegistration(true);
@@ -402,6 +402,14 @@ void pointCloudStitcher::keyListener(ofKeyEventArgs & a){
 bool pointCloudStitcher::isConnected(){
     return kinect[0].isConnected();
 }
+string pointCloudStitcher::isItConnectedString(){
+    if(kinect[0].isConnected()){
+        return "yes";
+    } else {
+        return "no";
+    }
+}
+
 bool pointCloudStitcher::isPointCloudDrawn(){
     return bDrawPointCloud;
 }
@@ -424,4 +432,7 @@ ofColor pointCloudStitcher::getPatchedColorAt(int x, int y){
 }
 ofColor pointCloudStitcher::getColorAt(int x, int y){
     return kinect[0].getColorAt(x, y);
+}
+ofVec2f pointCloudStitcher::getWH2fvec(){
+    return ofVec2f(width, height); 
 }

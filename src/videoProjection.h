@@ -26,7 +26,7 @@ public:
 
     void setup();
     void update();
-    void draw(ofxCv::ContourFinder &contourFinder);
+    void draw(ofxCv::ContourFinder* contourFinder);
     void drawLabelColorMap(); 
     void setupParameters();
     ofParameterGroup            videoParameters;

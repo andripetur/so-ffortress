@@ -35,6 +35,8 @@
 		14F4A2211BCAB4A7003F5F4E /* ofxAppGLFWWindowMulti.mm in Sources */ = {isa = PBXBuildFile; fileRef = 14F4A21B1BCAB4A7003F5F4E /* ofxAppGLFWWindowMulti.mm */; };
 		14F4A2221BCAB4A7003F5F4E /* WindowManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 14F4A21C1BCAB4A7003F5F4E /* WindowManager.cpp */; };
 		14F4A2271BCAB4DE003F5F4E /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14F4A2261BCAB4DE003F5F4E /* Carbon.framework */; };
+		14F4A22B1BCAF54E003F5F4E /* blobTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 14F4A2291BCAF54E003F5F4E /* blobTracker.cpp */; };
+		14F4A22E1BCB0122003F5F4E /* searchZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 14F4A22C1BCB0122003F5F4E /* searchZone.cpp */; };
 		169D3C72FDE6C5590A1616F5 /* ofxCvFloatImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7B6A03390302D5A2C9F0E4AB /* ofxCvFloatImage.cpp */; };
 		1D5F3298C2FA073628012944 /* ofxCvContourFinder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C76DE5C29BDBD2CAA1DD0021 /* ofxCvContourFinder.cpp */; };
 		21A059755481CC0BF969FD2D /* keep_alive.c in Sources */ = {isa = PBXBuildFile; fileRef = A3528DDFF05B00283552455D /* keep_alive.c */; };
@@ -199,6 +201,10 @@
 		14F4A21C1BCAB4A7003F5F4E /* WindowManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WindowManager.cpp; sourceTree = "<group>"; };
 		14F4A21D1BCAB4A7003F5F4E /* WindowManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WindowManager.h; sourceTree = "<group>"; };
 		14F4A2261BCAB4DE003F5F4E /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
+		14F4A2291BCAF54E003F5F4E /* blobTracker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = blobTracker.cpp; sourceTree = "<group>"; };
+		14F4A22A1BCAF54E003F5F4E /* blobTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = blobTracker.h; sourceTree = "<group>"; };
+		14F4A22C1BCB0122003F5F4E /* searchZone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = searchZone.cpp; sourceTree = "<group>"; };
+		14F4A22D1BCB0122003F5F4E /* searchZone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = searchZone.h; sourceTree = "<group>"; };
 		1E95EFD35ED9C5D97F2F015E /* timer.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = timer.h; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/timer.h; sourceTree = SOURCE_ROOT; };
 		241AAF7769D555E4ECD57E17 /* cameras.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = cameras.h; path = ../../../addons/ofxKinect/libs/libfreenect/src/cameras.h; sourceTree = SOURCE_ROOT; };
 		28F9707464BA3FF98E05096C /* usb_libusb10.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 30; name = usb_libusb10.c; path = ../../../addons/ofxKinect/libs/libfreenect/src/usb_libusb10.c; sourceTree = SOURCE_ROOT; };
@@ -582,22 +588,11 @@
 		14A322641BC7D6A700BD482A /* Projection mapping */ = {
 			isa = PBXGroup;
 			children = (
-				14A3224C1BC7D69700BD482A /* blueblock.cpp */,
-				14A3224D1BC7D69700BD482A /* blueblock.h */,
-				14A3224E1BC7D69700BD482A /* greenblock.cpp */,
-				14A3224F1BC7D69700BD482A /* greenblock.h */,
-				14A322501BC7D69700BD482A /* mypoint.cpp */,
-				14A322511BC7D69700BD482A /* mypoint.h */,
-				14A322521BC7D69700BD482A /* redblock.cpp */,
-				14A322531BC7D69700BD482A /* redblock.h */,
 				14A322541BC7D69700BD482A /* TexturedMesh.cpp */,
 				14A322551BC7D69700BD482A /* TexturedMesh.h */,
-				14A322561BC7D69700BD482A /* treefractal.cpp */,
-				14A322571BC7D69700BD482A /* treefractal.h */,
 				14A322581BC7D69700BD482A /* videoProjection.cpp */,
 				14A322591BC7D69700BD482A /* videoProjection.h */,
-				14A3225A1BC7D69700BD482A /* yellowblock.cpp */,
-				14A3225B1BC7D69700BD482A /* yellowblock.h */,
+				14F4A2281BCAF360003F5F4E /* Blocks */,
 			);
 			name = "Projection mapping";
 			sourceTree = "<group>";
@@ -630,6 +625,25 @@
 				14F4A21D1BCAB4A7003F5F4E /* WindowManager.h */,
 			);
 			path = src;
+			sourceTree = "<group>";
+		};
+		14F4A2281BCAF360003F5F4E /* Blocks */ = {
+			isa = PBXGroup;
+			children = (
+				14A3224C1BC7D69700BD482A /* blueblock.cpp */,
+				14A3224D1BC7D69700BD482A /* blueblock.h */,
+				14A3224E1BC7D69700BD482A /* greenblock.cpp */,
+				14A3224F1BC7D69700BD482A /* greenblock.h */,
+				14A322501BC7D69700BD482A /* mypoint.cpp */,
+				14A322511BC7D69700BD482A /* mypoint.h */,
+				14A322521BC7D69700BD482A /* redblock.cpp */,
+				14A322531BC7D69700BD482A /* redblock.h */,
+				14A322561BC7D69700BD482A /* treefractal.cpp */,
+				14A322571BC7D69700BD482A /* treefractal.h */,
+				14A3225A1BC7D69700BD482A /* yellowblock.cpp */,
+				14A3225B1BC7D69700BD482A /* yellowblock.h */,
+			);
+			name = Blocks;
 			sourceTree = "<group>";
 		};
 		170C3384C93B182490DDC9CC /* contrib */ = {
@@ -1042,6 +1056,7 @@
 		BBAB23C913894ECA00AA2426 /* system frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				14F4A2261BCAB4DE003F5F4E /* Carbon.framework */,
 				E7F985F515E0DE99003869B5 /* Accelerate.framework */,
 				E4C2424410CC5A17004149E2 /* AppKit.framework */,
 				E4C2424510CC5A17004149E2 /* Cocoa.framework */,
@@ -1138,7 +1153,6 @@
 		E4B69B4A0A3A1720003C02F2 = {
 			isa = PBXGroup;
 			children = (
-				14F4A2261BCAB4DE003F5F4E /* Carbon.framework */,
 				E4B6FCAD0C3E899E008CF71C /* openFrameworks-Info.plist */,
 				E4EB6923138AFD0F00A09F29 /* Project.xcconfig */,
 				E4B69E1C0A3A1BDC003C02F2 /* src */,
@@ -1160,6 +1174,10 @@
 				14CCB40F1BB098030092931F /* colorNamer.h */,
 				14DD891F1BAAFA2D00BC1F70 /* pointCloudStitcher.cpp */,
 				14DD89201BAAFA2D00BC1F70 /* pointCloudStitcher.h */,
+				14F4A2291BCAF54E003F5F4E /* blobTracker.cpp */,
+				14F4A22A1BCAF54E003F5F4E /* blobTracker.h */,
+				14F4A22C1BCB0122003F5F4E /* searchZone.cpp */,
+				14F4A22D1BCB0122003F5F4E /* searchZone.h */,
 				14A322641BC7D6A700BD482A /* Projection mapping */,
 			);
 			path = src;
@@ -1322,6 +1340,7 @@
 				140798841BAB2BD900EDEF78 /* Kalman.cpp in Sources */,
 				14A322631BC7D69700BD482A /* yellowblock.cpp in Sources */,
 				3F01B8EF1BA4782100A3B771 /* tinyxmlerror.cpp in Sources */,
+				14F4A22E1BCB0122003F5F4E /* searchZone.cpp in Sources */,
 				140798821BAB2BD900EDEF78 /* Flow.cpp in Sources */,
 				3F82B6581B98D40C00743C68 /* UdpSocketWin.cpp in Sources */,
 				686B0DF6249B52E1A85B39EC /* ofxKinect.cpp in Sources */,
@@ -1353,6 +1372,7 @@
 				3F01B8DB1BA46D4700A3B771 /* ofxGuiGroup.cpp in Sources */,
 				140798871BAB2BD900EDEF78 /* Tracker.cpp in Sources */,
 				14A3225C1BC7D69700BD482A /* blueblock.cpp in Sources */,
+				14F4A22B1BCAF54E003F5F4E /* blobTracker.cpp in Sources */,
 				49BEEB2DFA5319D55AA6899F /* tilt.c in Sources */,
 				14A3225E1BC7D69700BD482A /* mypoint.cpp in Sources */,
 				140798801BAB2BD900EDEF78 /* ContourFinder.cpp in Sources */,

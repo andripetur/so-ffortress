@@ -32,9 +32,13 @@ public:
     
     ofParameterGroup patchCloudParameters, viewPointCloudParameters;
     
+    //kinect dimensions
     int width;
     int height;
+    ofVec2f getWH2fvec();
+    
     bool isConnected();
+    string isItConnectedString(); 
     bool isPointCloudDrawn();
     bool getHasNewFrame();
     

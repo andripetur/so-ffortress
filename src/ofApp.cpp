@@ -13,30 +13,9 @@ void ofApp::setup() {
     winManager.setWindowPosition(1, 0, 0);
     
     kinect.setup();
+    blobTrackr.setup(kinect.getWH2fvec());
     clrNamer.setup();
     vidProjection.setup();
-    
-    // allocate space for compVis shiznit
-    patchedImageCv.allocate(kinect.width, kinect.height);
-    grayDiff.allocate(kinect.width, kinect.height);
-    grayDiffOfImage.allocate(kinect.width, kinect.height);
-    bgImage.allocate(kinect.width, kinect.height);
-    
-    // init bg extract to off
-    bLearnBackground = false;
-    bBackgroundLearned = false;
-    bForgetBackground = false;
-    
-    // set contFinderVariables
-    contFinder.setMinArea(100);
-    contFinder.setMaxArea((kinect.width*kinect.height)/2);
-    contFinder.setThreshold(5);
-    contFinder.setFindHoles(false);
-
-    // wait for a frame before forgetting something
-    contFinder.getTracker().setPersistence(30);
-    // an object can move up to 32 pixels per frame
-    contFinder.getTracker().setMaximumDistance(32);
     
 	ofSetFrameRate(10);
     // open an outgoing OSC connection to HOST:PORT
@@ -57,18 +36,12 @@ void ofApp::setupGui(){
     mainAppPm.add(bShowInfo.set("info", false));
     mainAppPm.add(bShowLabelColors.set("show Label&Colors", false));
     mainAppPm.add(bDrawProjectionMapping.set("draw projection mapping", false));
-    mainAppPm.add(minArea.set("cvMinArea", 100, 50, 300));
     mainAppPm.add(host.set("host", HOST));
     gui.add(mainAppPm);
     
+    gui.add(blobTrackr.blobTrackerPms);
     // search zone pm's
-    searchZonePmGroup.setName("SearchZonePms");
-    searchZonePmGroup.add(bSearchZoneOn.set("SearchZoneEnable", false));
-    searchZonePmGroup.add(sZwidth.set("width", 100, 2, kinect.width));
-    searchZonePmGroup.add(sZheight.set("height", 100, 2, kinect.height));
-    ofPoint kinBoRi(kinect.width, kinect.height);
-    searchZonePmGroup.add(szCenter.set("center", kinBoRi*0.5, ofPoint(0), kinBoRi ));
-    gui.add(searchZonePmGroup);
+    gui.add(blobTrackr.searchZone.parameters);
     
     // projectionMapping gui
     gui.add( vidProjection.redBlockParameters );
@@ -76,52 +49,16 @@ void ofApp::setupGui(){
 
     // set position and save path
     gui.setPosition(10, 10);
+    gui.minimizeAll();
     gui.saveToFile("patchCloudParameters");
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
     kinect.update();
-
-    searchZone.setFromCenter(ofPoint(szCenter), sZwidth, sZheight);
     
     if( kinect.getHasNewFrame() ){
-        patchedImageCv = kinect.getPatchedCvImage(); // get the merged cvImage from the two kinects
-
-        // set new background image
-        if(bLearnBackground){
-            bgImage = patchedImageCv;   // let this frame be the background image from now on
-            bLearnBackground = false;
-            bBackgroundLearned = true;
-        }
-        
-        // forget background image
-        if(bForgetBackground){
-            bBackgroundLearned = false;
-            bForgetBackground = false;
-        }
-        // set minimal blob area
-        contFinder.setMinArea(minArea);
-        
-        patchedImageCv.flagImageChanged();
-        if(bBackgroundLearned){
-            cvAbsDiff(bgImage.getCvImage(), patchedImageCv.getCvImage(), grayDiff.getCvImage());
-            cvErode(grayDiff.getCvImage(), grayDiff.getCvImage(), NULL, 2);
-            cvDilate(grayDiff.getCvImage(), grayDiff.getCvImage(), NULL, 1);
-            // threshold ignoring little differences
-            cvThreshold(grayDiff.getCvImage(), grayDiff.getCvImage(), 4, 255, CV_THRESH_BINARY);
-            grayDiff.flagImageChanged();
-            // update the ofImage to be used as background mask for the blob finder
-            grayDiffOfImage.setFromPixels(grayDiff.getPixels(), kinect.width, kinect.height);
-            
-            // update the cv images
-            grayDiffOfImage.flagImageChanged();
-
-            // pass image on to contour finder
-            contFinder.findContours(grayDiffOfImage.getCvImage());
-        } else {
-            contFinder.findContours(patchedImageCv.getCvImage());
-        }//backGroundLearned
+        blobTrackr.update(kinect.getPatchedCvImage());
     }
     
     vidProjection.update();
@@ -131,7 +68,9 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::oscSender(){
 //#define SHOW_SENDER_DEBUG
-    ofxCv::RectTracker& tracker = contFinder.getTracker();
+    ofxCv::ContourFinder* contourFinder = blobTrackr.getContourFinderPointer();
+    ofxCv::RectTracker& tracker = contourFinder->getTracker();
+    
     const vector<unsigned int>& newLabels = tracker.getNewLabels();
     const vector<unsigned int>& deadLabels = tracker.getDeadLabels();
     
@@ -139,7 +78,7 @@ void ofApp::oscSender(){
     ofRectangle area;
     int label;
     static map<int, bool> toSend;  //map of labels and if they should be sent
-    ofPixelsRef patchedImagePixRef = patchedImageCv.getPixelsRef(); // getPathcedImage
+    ofPixelsRef patchedImagePixRef = blobTrackr.getPatchedImageCvPixelRef(); // getPathcedImage
     ofColor tempClr;
     string colorName;
     bool bToSend; // temp bToSend
@@ -147,10 +86,10 @@ void ofApp::oscSender(){
     // new block = /newBlob <label> <color>
     for(int i=0; i< newLabels.size(); ++i){
         label = newLabels[i];
-        area = ofxCv::toOf( contFinder.getBoundingRect(i) ); // get area of blob
-        if(bSearchZoneOn){
+        area = ofxCv::toOf( contourFinder->getBoundingRect(i) ); // get area of blob
+        if( blobTrackr.searchZone.isOn() ){
             // send if inside search zone
-            bToSend = searchZone.inside(area);
+            bToSend = blobTrackr.searchZone.isInside(area);
             toSend.insert(pair<int, bool>(label, bToSend));
         } else {
             bToSend = true;
@@ -173,9 +112,9 @@ void ofApp::oscSender(){
     }
     
     // block update = /currentBlob <label> <area> <age> <x> <y> <z>
-    for(int i=0; i<contFinder.size(); ++i){
-        label = contFinder.getLabel(i);
-        if(bSearchZoneOn){
+    for(int i=0; i<contourFinder->size(); ++i){
+        label = contourFinder->getLabel(i);
+        if( blobTrackr.searchZone.isOn() ){
             bToSend = toSend.find( label )->second;
         } else {
             bToSend = true;
@@ -185,10 +124,10 @@ void ofApp::oscSender(){
             ofxOscMessage m;
             m.setAddress("/currentBlob");
             m.addIntArg( label );        // label
-            area = ofxCv::toOf( contFinder.getBoundingRect(i));
+            area = ofxCv::toOf( contourFinder->getBoundingRect(i));
             m.addIntArg((area.width*area.height ));                // area
             m.addIntArg(tracker.getAge(label) );                   // age
-            loc = ofxCv::toOf(contFinder.getCenter(i));
+            loc = ofxCv::toOf(contourFinder->getCenter(i));
             m.addIntArg(loc.x);                                    // x
             m.addIntArg(loc.y);                                    // y
             m.addIntArg( patchedImagePixRef.getColor(loc.x, loc.y).getBrightness()); // z
@@ -215,7 +154,7 @@ void ofApp::oscSender(){
 ofColor ofApp::avgColor(ofRectangle area){
 
     ofColor avgColor, currColor;
-    ofPixelsRef greyDiffPix = grayDiffOfImage.getPixelsRef();
+    ofPixelsRef greyDiffPix = blobTrackr.getDrayDiffImagePixelRef();
     unsigned int r, g, b;
     r = g = b = 0;
     int numberOfColoredPixels = 0;
@@ -251,64 +190,25 @@ ofColor ofApp::avgColor(ofRectangle area){
 }
 
 //--------------------------------------------------------------
-void ofApp::drawContFinder(){
-    ofxCv::RectTracker& tracker = contFinder.getTracker();
-    
-    // draw merged depth image.
-    if(bBackgroundLearned){
-        // draw bg extraction 
-        grayDiffOfImage.draw(0,0);
-    } else {
-        // draw clean
-        patchedImageCv.draw(0, 0);
-    }
-    
-    // draw contour finder bw image
-    contFinder.draw();
-    
-    // draw search rectangle
-    if(bSearchZoneOn){
-        ofSetColor(ofColor().red);
-        ofNoFill();
-        ofRect(searchZone);
-    }
-    
-    // draw label and age.
-    int label;
-    string msg;
-    for(int i = 0; i < contFinder.size(); ++i) {
-        ofPushMatrix();
-            ofTranslate( ofxCv::toOf(contFinder.getCenter(i)) );
-            label = contFinder.getLabel(i);
-            ofSetColor( 0, 255, 50);
-            msg = ofToString(label) + ":" + ofToString(tracker.getAge(label));
-            ofDrawBitmapString(msg, 0, 0);
-        ofPopMatrix();
-    }
-}
-
-//--------------------------------------------------------------
 void ofApp::draw() {
+    // check which windod we will be drawing to
     int activeWindow = winManager.getActiveWindowNo();
     
     ofSetColor(255, 255, 255);
     if( activeWindow == 0){ // if in main window draw to be beamed stuff:
         if(bDrawProjectionMapping){
-            vidProjection.draw(contFinder); // beam on blocks
+            vidProjection.draw(blobTrackr.getContourFinderPointer()); // beam on blocks
         } else {
             ofBackground(100, 100, 100);
 
-            kinect.draw();
+            kinect.draw(); // draw from kinect
             if(!kinect.isPointCloudDrawn()) {
-                ofPushMatrix();
-                    ofTranslate(420, 10);
-                    ofScale(0.625, 0.625);
-                    drawContFinder();
-                ofPopMatrix();
+                blobTrackr.draw(); // draw blobTrackr
             }
         }
     }else{ // if gui window draw gui elements
         ofBackground(60, 60, 60);
+        ofSetColor(0);
         gui.draw();
         
         // draw info
@@ -320,7 +220,7 @@ void ofApp::draw() {
             << " b to learn background."<< endl
             << " f to forget background."<< endl
             << " space to dis/enable mouse input for pointcloud"<< endl
-            << " num blobs found " << contFinder.size()
+            << " num blobs found " << blobTrackr.getNumberOfActiveBlobs()
             << " fps: " << ofGetFrameRate() << endl
             << " c to close connection, o to open it again, connection is: " << kinect.isConnected() << endl;
             
@@ -342,14 +242,6 @@ void ofApp::exit() {
 //--------------------------------------------------------------
 void ofApp::keyPressed (int key) {
 	switch (key) {
-        case 'b':
-            bLearnBackground = true;
-            break;
-            
-        case 'f':
-            bForgetBackground = true;
-            break;
-            
         case'i':
         case'I':
             bShowInfo = !bShowInfo;

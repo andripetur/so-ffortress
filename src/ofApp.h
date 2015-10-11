@@ -9,6 +9,7 @@
 #include "colorNamer.h"
 #include "videoProjection.h"
 #include "WindowManager.h"
+#include "blobTracker.h"
 
 //#define HOST "localhost"
 #define HOST "169.254.97.135"
@@ -35,28 +36,10 @@ public:
     ofxPanel gui;
     ofParameterGroup mainAppPm;
     ofParameter<bool> bShowInfo, bDrawProjectionMapping, bShowLabelColors;
-    ofParameter<int> minArea;
     ofParameter<string> host;
     
-    //CompVisionShizNit
-    void drawContFinder();
-
-    ofxCv::ContourFinder    contFinder;
-    ofxCvGrayscaleImage     patchedImageCv;
-    ofxCvGrayscaleImage     grayDiffOfImage;
-    ofxCvGrayscaleImage 	grayDiff;
-    ofxCvGrayscaleImage     bgImage;
-    
-    bool bLearnBackground;
-    bool bBackgroundLearned;
-    bool bForgetBackground;
-
-    // search zone
-    ofRectangle searchZone;
-    ofParameterGroup searchZonePmGroup;
-    ofParameter<bool> bSearchZoneOn;
-    ofParameter<float> sZwidth, sZheight;
-    ofParameter<ofVec2f> szCenter;
+    // blob tracker
+    blobTracker blobTrackr; 
     
     // colorFinding
     ofColor avgColor(ofRectangle area);

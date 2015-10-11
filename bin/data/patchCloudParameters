@@ -20,9 +20,12 @@
 		<info>0</info>
 		<show_Label&Colors>0</show_Label&Colors>
 		<draw_projection_mapping>0</draw_projection_mapping>
-		<cvMinArea>100</cvMinArea>
 		<host>169.254.97.135</host>
 	</mainApp>
+	<blobTracker>
+		<learn_background>0</learn_background>
+		<cvMinArea>100</cvMinArea>
+	</blobTracker>
 	<SearchZonePms>
 		<SearchZoneEnable>0</SearchZoneEnable>
 		<width>100</width>
