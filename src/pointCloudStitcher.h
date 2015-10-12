@@ -13,7 +13,7 @@
 #ifndef __kinectExample__pointCloudStitcher__
 #define __kinectExample__pointCloudStitcher__
 
-#define amt 2
+#define N_OF_KINECTS 2
 
 #define N_FRAMES 3
 
@@ -50,12 +50,12 @@ public:
     ofxCvColorImage getPatcheColorImage();
     
 private:
-    ofxKinect kinect[amt];
+    ofxKinect kinect[N_OF_KINECTS];
     int angle;
     bool hasNewFrame;
-    ofxCvGrayscaleImage grayImage[amt]; // grayscale depth image
+    ofxCvGrayscaleImage grayImage[N_OF_KINECTS]; // grayscale depth image
     ofxCvGrayscaleImage patchedImageCv, pathcedImgCvSmooth;
-    ofxCvColorImage colorImage[amt];
+    ofxCvColorImage colorImage[N_OF_KINECTS];
     ofxCvColorImage patchedImageColor,patchedImageClrSmooth;
     
     ofPixels clrAdjust(ofxCvColorImage *img);

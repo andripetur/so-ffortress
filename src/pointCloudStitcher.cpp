@@ -12,7 +12,7 @@ void pointCloudStitcher::setup(){
     // zero the tilt on startup
     angle = 0;
     hasNewFrame = false; 
-    for(int i=0; i<amt; ++i){
+    for(int i=0; i<N_OF_KINECTS; ++i){
         kinect[i].setRegistration(true);
         kinect[i].init(false, true);
         kinect[i].open();
@@ -66,12 +66,12 @@ void pointCloudStitcher::update(){
             cam.disableMouseInput();
         }
     }
-    for(int i=0; i<amt;++i) kinect[i].update();
+    for(int i=0; i<N_OF_KINECTS;++i) kinect[i].update();
     
     // there is a new frame and we are connected
     if(kinect[0].isFrameNew()) {
         
-        for(int i=0;i<amt;++i){
+        for(int i=0;i<N_OF_KINECTS;++i){
             // load grayscale depth image from the kinect source
             grayImage[i].setFromPixels(kinect[i].getDepthPixels(), kinect[i].width, kinect[i].height);
             colorImage[i].setFromPixels(kinect[i].getPixels(), kinect[i].width, kinect[i].height);
@@ -346,7 +346,7 @@ void pointCloudStitcher::drawPointCloud() {
 }
 
 void pointCloudStitcher::exit(ofEventArgs & a){
-    for(int i=0; i<amt; ++i){
+    for(int i=0; i<N_OF_KINECTS; ++i){
         kinect[i].setCameraTiltAngle(0); // zero the tilt on exit
         kinect[i].close();
     }
@@ -367,14 +367,14 @@ void pointCloudStitcher::keyListener(ofKeyEventArgs & a){
             break;
             
         case 'o':
-            for(int i=0;i<amt;++i) {
+            for(int i=0;i<N_OF_KINECTS;++i) {
                 kinect[i].setCameraTiltAngle(angle); // go back to prev tilt
                 kinect[i].open();
             }
             break;
             
         case 'c':
-            for(int i=0;i<amt;++i) {
+            for(int i=0;i<N_OF_KINECTS;++i) {
                 kinect[i].setCameraTiltAngle(0); // zero the tilt
                 kinect[i].close();
             }
@@ -388,13 +388,13 @@ void pointCloudStitcher::keyListener(ofKeyEventArgs & a){
         case OF_KEY_UP:
             angle++;
             if(angle>30) angle=30;
-            for(int i=0;i<amt;++i) kinect[i].setCameraTiltAngle(angle);
+            for(int i=0;i<N_OF_KINECTS;++i) kinect[i].setCameraTiltAngle(angle);
             break;
             
         case OF_KEY_DOWN:
             angle--;
             if(angle<-30) angle=-30;
-            for(int i=0;i<amt;++i) kinect[i].setCameraTiltAngle(angle);
+            for(int i=0;i<N_OF_KINECTS;++i) kinect[i].setCameraTiltAngle(angle);
             break;
     }
 }

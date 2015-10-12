@@ -25,6 +25,8 @@
 	<blobTracker>
 		<learn_background>0</learn_background>
 		<cvMinArea>100</cvMinArea>
+		<movementTresholdOn>0</movementTresholdOn>
+		<movementTreshold>0.5</movementTreshold>
 	</blobTracker>
 	<SearchZonePms>
 		<SearchZoneEnable>0</SearchZoneEnable>

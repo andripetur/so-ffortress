@@ -16,6 +16,7 @@ void blobTracker::setup(ofVec2f k){
     grayDiff.allocate(k.x, k.y);
     grayDiffOfImage.allocate(k.x, k.y);
     bgImage.allocate(k.x, k.y);
+    lastFrameGrayDiffImage.allocate(k.x, k.y);
     
     // set contFinderVariables
     contFinder.setMinArea(100);
@@ -30,6 +31,7 @@ void blobTracker::setup(ofVec2f k){
     
     // setupSearchZOne
     searchZone.setup(k);
+    movementAmount = 0;
 
     setupParameters();
 }
@@ -41,6 +43,8 @@ void blobTracker::setupParameters(){
     bBackgroundLearned = false;
     bForgetBackground = true;
     blobTrackerPms.add(minArea.set("cvMinArea", 100, 50, 300));
+    blobTrackerPms.add(bMovementTresholdOn.set("movementTresholdOn", false));
+    blobTrackerPms.add(movementTreshold.set("movementTreshold", 0.5, 0, 1));
 }
 
 void blobTracker::update(ofxCvGrayscaleImage depthImage){
@@ -75,11 +79,47 @@ void blobTracker::update(ofxCvGrayscaleImage depthImage){
         // update the cv images
         grayDiffOfImage.flagImageChanged();
         
+        calculateMovement();
+        
         // pass image on to contour finder
-        contFinder.findContours(grayDiffOfImage.getCvImage());
+        // if moventTresholding is on and movement is less than thresold value
+        // if movement thresholding is off
+        if( (bMovementTresholdOn && (movementAmount < movementTreshold)) || bMovementTresholdOn == false) {
+            contFinder.findContours(grayDiffOfImage.getCvImage());
+        }
+        
     } else {
         contFinder.findContours(patchedImageCv.getCvImage());
     }//backGroundLearned
+}
+
+void blobTracker::calculateMovement(){
+    int currFrameMovement;
+    int nrOfPixelsCounted;
+    
+    //check the difference beetween last and current frame
+    lastFrameGrayDiffImage.absDiff(grayDiffOfImage);
+    if( searchZone.isOn() ){
+        ofPoint tpLeft = searchZone.getArea().getTopLeft();
+        ofPoint btRight = searchZone.getArea().getBottomLeft();
+        nrOfPixelsCounted = searchZone.getArea().getArea();
+        
+        currFrameMovement = lastFrameGrayDiffImage.countNonZeroInRegion(tpLeft.x, tpLeft.y, btRight.x, btRight.y);
+    } else {
+        nrOfPixelsCounted = (k.x*k.y);
+
+        currFrameMovement = lastFrameGrayDiffImage.countNonZeroInRegion(0, 0, k.x, k.y);
+    }
+    
+    // normalize value
+    currFrameMovement /= (float)nrOfPixelsCounted;
+    
+    // Smooth value
+    movementAmount = (movementAmount * 7 + currFrameMovement + 7) / (float)8;
+    
+    cout << "momvement amt: "<< movementAmount << endl;
+
+    lastFrameGrayDiffImage = grayDiffOfImage;
 }
 
 void blobTracker::drawContourFinder(){

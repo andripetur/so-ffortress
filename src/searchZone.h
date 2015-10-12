@@ -19,11 +19,12 @@ public:
     
     ofParameterGroup parameters;
     bool isOn();
-    bool isInside(ofRectangle area); 
+    bool isInside(ofRectangle area);
+    ofRectangle getArea(); 
 private:
     ofVec2f k; 
     // search zone
-    ofRectangle searchZone;
+    ofRectangle area;
     ofParameter<bool> bSearchZoneOn;
     ofParameter<float> sZwidth, sZheight;
     ofParameter<ofVec2f> szCenter;

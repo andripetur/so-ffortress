@@ -209,6 +209,7 @@ void ofApp::draw() {
     }else{ // if gui window draw gui elements
         ofBackground(60, 60, 60);
         ofSetColor(0);
+        
         gui.draw();
         
         // draw info

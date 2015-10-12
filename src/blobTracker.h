@@ -23,6 +23,7 @@ public:
     void drawContourFinder();
     void draw();
     void keyListener(ofKeyEventArgs & a);
+    void calculateMovement();
     
     ofParameterGroup blobTrackerPms;
 
@@ -42,8 +43,12 @@ private:
     ofxCvGrayscaleImage     grayDiffOfImage;
     ofxCvGrayscaleImage 	grayDiff;
     ofxCvGrayscaleImage     bgImage;
+    ofxCvGrayscaleImage     lastFrameGrayDiffImage;
     
-    ofParameter<bool> bLearnBackground,bBackgroundLearned,bForgetBackground;
+    float   movementAmount;
+    
+    ofParameter<bool> bLearnBackground,bBackgroundLearned,bForgetBackground, bMovementTresholdOn;
+    ofParameter<float> movementTreshold;
     ofParameter<int> minArea;
 
 };

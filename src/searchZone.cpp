@@ -23,14 +23,14 @@ void searchZone::setupParameters(){
 }
 
 void searchZone::update(){
-    searchZone.setFromCenter(ofPoint(szCenter), sZwidth, sZheight);
+    area.setFromCenter(ofPoint(szCenter), sZwidth, sZheight);
 }
 
 void searchZone::draw(){
     if(bSearchZoneOn){
         ofSetColor(ofColor().red);
         ofNoFill();
-        ofRect(searchZone);
+        ofRect(area);
     }
 }
 
@@ -38,5 +38,8 @@ bool searchZone::isOn(){
     return bSearchZoneOn;
 }
 bool searchZone::isInside(ofRectangle area){
-    return searchZone.inside(area);
+    return this->area.inside(area);
+}
+ofRectangle searchZone::getArea(){
+    return area;
 }
